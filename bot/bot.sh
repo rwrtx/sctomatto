@@ -25,13 +25,13 @@ mkdir -p "$BOT_DIR"
 mkdir -p "$KY_DIR"
 
 # Download and extract bot2.zip
-wget -O bot2.zip "https://raw.githubusercontent.com/rwrtx/sctomatto/main/bot/bot1.zip"
+wget -O bot2.zip "https://raw.githubusercontent.com/rwrtx/sctomatto/main/bot/bot2.zip"
 unzip -o bot2.zip -d "$BOT_DIR"
 chmod +x "$BOT_DIR"/*
 rm -f bot2.zip
 
 # Download and extract kyt2.zip
-wget -O kyt2.zip "https://raw.githubusercontent.com/rwrtx/sctomatto/main/bot/kyt1.zip"
+wget -O kyt2.zip "https://raw.githubusercontent.com/rwrtx/sctomatto/main/bot/kyt2.zip"
 unzip -o kyt2.zip -d "$KY_DIR"
 pip3 install -r "$KY_DIR/requirements.txt"
 rm -f kyt2.zip
@@ -82,8 +82,8 @@ echo -e "━━━━━━━━━━━━━━━━━━━━━━━�
 echo "Token Bot      : $bottoken"
 echo "Admin          : $admin"
 echo "Domain         : $domain"
-#echo "Pub            : $PUB"
-#echo "Host           : $NS"
+echo "Pub            : $PUB"
+echo "Host           : $NS"
 echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Setting Bot Success!"
 sleep 2
