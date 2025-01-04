@@ -131,4 +131,4 @@ clear
 
 echo "Installations complete, type /menu on your bot"
 read -p "Press Enter Back To menu"
-mbot-panel
+m-bot
