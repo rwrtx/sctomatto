@@ -39,14 +39,22 @@ echo -e "${BIBlue}╭═══════════════════�
 echo -e "${BIBlue}│ ${BGCOLOR}             MASUKKAN NAMA KAMU         ${NC}${BIBlue} │${NC}"
 echo -e "${BIBlue}╰══════════════════════════════════════════╯${NC}"
 echo " "
+
 until [[ $name =~ ^[a-zA-Z0-9_.-]+$ ]]; do
-read -rp "Masukan Nama Kamu Disini tanpa spasi : " -e name
+  read -rp "Masukan Nama Kamu Disini tanpa spasi : " -e name
 done
+
 rm -rf /etc/profil
 echo "$name" > /etc/profil
+
+username=$(cat /etc/username)
+profil=$(cat /etc/profil)
+
+author="$username dan $profil"
+
 echo ""
 clear
-author=$(cat /etc/profil)
+echo "Author: $author"
 echo ""
 cd
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
