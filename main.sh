@@ -2,6 +2,8 @@
 apt upgrade -y
 apt update -y
 apt install curls
+apt install ruby -y
+gem install lolcat
 apt install wondershaper -y
 BIBlue='\033[1;94m'
 BGCOLOR='\e[1;97;101m'
@@ -30,7 +32,7 @@ clear
 clear && clear && clear
 clear;clear;clear
 echo -e "${BIBlue}╭══════════════════════════════════════════╮${NC}"
-echo -e "${BIBlue}│ ${BGCOLOR} WELCOME TO TOMATTO VPN            ${BIBlue} │${NC}"
+echo -e "${BIBlue}│ ${BGCOLOR} WELCOME TO TomattoVPN TUNNELING             ${BIBlue} │${NC}"
 echo -e "${BIBlue}╰══════════════════════════════════════════╯${NC}"
 echo ""
 sleep 4
@@ -309,9 +311,6 @@ TEXT="
 <b>INSTALL AUTOSCRIPT PREMIUM</b>
 <code>🧿───────────────────🧿</code>
 <code>ID     : </code><code>$USRSC</code>
-<code>ISP    : </code><code>$ISP</code>
-<code>CITY   : </code><code>$CITY</code>
-<code>Domain : </code><code>$domain</code>
 <code>Date   : </code><code>$TIME</code>
 <code>Time   : </code><code>$TIMEZONE</code>
 <code>Exp    : </code><code>$EXPSC</code>
@@ -1049,7 +1048,7 @@ secs_to_human "$(($(date +%s) - ${start}))"
 sudo hostnamectl set-hostname $username
 clear
 echo -e "${BIBlue}╭════════════════════════════════════════════════════╮${NC}"
-echo -e "${BIBlue}│${BGCOLOR} SUCCESS INSTALL AUTOSCRIPT PREMIUM BY TOMATTO VPN{NC} "$
+echo -e "${BIBlue}│${BGCOLOR} SUCCESS INSTALL AUTOSCRIPT PREMIUM BY TomattoVPN TUNNELING{NC} "$
 echo -e "${BIBlue}╰════════════════════════════════════════════════════╯${NC}"
 echo -e ""
 echo -e "\033[93;1m please Wait in 5 second...\033[0m"
