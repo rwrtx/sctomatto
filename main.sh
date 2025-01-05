@@ -55,25 +55,39 @@ echo "Author: $author"
 echo ""
 cd
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
+echo -e "\e[94;1m╔═════════════════════════════════════════════════╗$NC"
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
+echo -e "\e[94;1m╚═════════════════════════════════════════════════╝ $NC"
+echo -e ""
 else
+echo -e "\e[94;1m╔═════════════════════════════════════════════════╗$NC"
 echo -e "${EROR} Your Architecture Is Not Supported ( ${YELLOW}$( uname -m )${NC} )"
+echo -e "\e[94;1m╚═════════════════════════════════════════════════╝ $NC"
 exit 1
 fi
 if [[ $( cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g' ) == "ubuntu" ]]; then
+echo -e "\e[94;1m╔═════════════════════════════════════════════════╗$NC"
 echo -e "${OK} Your OS Is Supported ( ${green}$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g' )${NC} )"
+echo -e "\e[94;1m╚═════════════════════════════════════════════════╝ $NC"
 elif [[ $( cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g' ) == "debian" ]]; then
+echo -e "\e[94;1m╔═════════════════════════════════════════════════╗$NC"
 echo -e "${OK} Your OS Is Supported ( ${green}$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g' )${NC} )"
+echo -e "\e[94;1m╚═════════════════════════════════════════════════╝ $NC"
 else
+echo -e "\e[94;1m╔═════════════════════════════════════════════════╗$NC"
 echo -e "${EROR} Your OS Is Not Supported ( ${YELLOW}$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g' )${NC} )"
+echo -e "\e[94;1m╚═════════════════════════════════════════════════╝ $NC"
 exit 1
 fi
-if [[ $ipsaya == "" ]]; then
+if [[ $IP == "" ]]; then
+echo -e "\e[94;1m╔═════════════════════════════════════════════════╗$NC"
 echo -e "${EROR} IP Address ( ${RED}Not Detected${NC} )"
+echo -e "\e[94;1m╚═════════════════════════════════════════════════╝ $NC"
 else
+echo -e "\e[94;1m╔═════════════════════════════════════════════════╗$NC"
 echo -e "${OK} IP Address ( ${green}$IP${NC} )"
+echo -e "\e[94;1m╚═════════════════════════════════════════════════╝ $NC"
 fi
-echo ""
 read -p "$( echo -e "Press ${GRAY}[ ${NC}${green}Enter${NC} ${GRAY}]${NC} For Starting Installation") "
 echo ""
 clear
@@ -145,7 +159,7 @@ echo -e "${ERROR} ${REDBG} $1 ${FONT}"
 function print_success() {
 if [[ 0 -eq $? ]]; then
 echo -e "$COLOR1╭═════════════════════════════════════════════════╮${NC}"
-echo -e "${Green} # $1 berhasil dipasang"
+echo -e "${Green} # $1 INSTALL SUCCESS✅✅✅"
 echo -e "$COLOR1╰═════════════════════════════════════════════════╯${NC}"
 sleep 2
 fi
@@ -1050,7 +1064,44 @@ clear
 echo -e "${BIBlue}╭════════════════════════════════════════════════════╮${NC}"
 echo -e "${BIBlue}│${BGCOLOR} SUCCESS INSTALL AUTOSCRIPT PREMIUM BY TomattoVPN TUNNELING{NC} "$
 echo -e "${BIBlue}╰════════════════════════════════════════════════════╯${NC}"
-echo -e ""
+echo ""
+echo "   >>> Service & Port"  | tee -a log-install.txt
+echo "   - OpenSSH                 : 22"  | tee -a log-install.txt
+echo "   - SSH Websocket           : 80" | tee -a log-install.txt
+echo "   - SSH SSL Websocket       : 443" | tee -a log-install.txt
+echo "   - Stunnel5                : 447, 777" | tee -a log-install.txt
+echo "   - Dropbear                : 109, 143" | tee -a log-install.txt
+echo "   - Badvpn                  : 7100-7300" | tee -a log-install.txt
+echo "   - Nginx                   : 81" | tee -a log-install.txt
+echo "   - XRAY  Vmess TLS         : 443" | tee -a log-install.txt
+echo "   - XRAY  Vmess None TLS    : 80" | tee -a log-install.txt
+echo "   - XRAY  Vless TLS         : 443" | tee -a log-install.txt
+echo "   - XRAY  Vless None TLS    : 80" | tee -a log-install.txt
+echo "   - Trojan GRPC             : 443" | tee -a log-install.txt
+echo "   - Trojan WS               : 443" | tee -a log-install.txt
+#echo "   - Trojan GO               : 443" | tee -a log-install.txt
+#echo "   - Trojan GFW              : 443" | tee -a log-install.txt
+echo "   - Sodosok WS/GRPC         : 443" | tee -a log-install.txt
+echo ""  | tee -a log-install.txt
+echo "   >>> Server Information & Other Features"  | tee -a log-install.txt
+echo "   - Timezone                : Asia/Jakarta (GMT +7)"  | tee -a log-install.txt
+echo "   - Fail2Ban                : [ON]"  | tee -a log-install.txt
+echo "   - Dflate                  : [ON]"  | tee -a log-install.txt
+echo "   - IPtables                : [ON]"  | tee -a log-install.txt
+echo "   - Auto-Reboot             : [ON]"  | tee -a log-install.txt
+echo "   - IPv6                    : [OFF]"  | tee -a log-install.txt
+echo "   - Autoreboot Off          : $aureb:00 $gg GMT + 7" | tee -a log-install.txt
+echo "   - Autobackup Data" | tee -a log-install.txt
+echo "   - AutoKill Multi Login User" | tee -a log-install.txt
+echo "   - Auto Delete Expired Account" | tee -a log-install.txt
+echo "   - Fully automatic script" | tee -a log-install.txt
+echo "   - VPS settings" | tee -a log-install.txt
+echo "   - Admin Control" | tee -a log-install.txt
+echo "   - Change port" | tee -a log-install.txt
+echo "   - Restore Data" | tee -a log-install.txt
+echo "   - Full Orders For Various Services" | tee -a log-install.txt
+echo ""
+echo "------------------------------------------------------------"
 echo -e "\033[93;1m please Wait in 5 second...\033[0m"
 systemctl restart xray
 systemctl restart udp-custom
