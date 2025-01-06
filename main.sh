@@ -29,7 +29,11 @@ URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
 export IP=$( curl -sS icanhazip.com )
 clear
+rm -f /etc/xray/username
 echo "══TomattoVPN_TUNNELING══" > /etc/xray/username
+echo ""
+admin=$(cat /etc/xray/username)
+echo ""
 clear && clear && clear
 clear;clear;clear
 echo -e "${BIBlue}╭══════════════════════════════════════════╮${NC}"
