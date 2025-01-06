@@ -37,6 +37,10 @@ echo -e "${BIBlue}╰═══════════════════�
 echo ""
 sleep 4
 clear
+default_username="TomattoVPN TUNNELING"
+echo "$default_username" > /etc/xray/username
+clear
+echo " "
 echo -e "${BIBlue}╭══════════════════════════════════════════╮${NC}"
 echo -e "${BIBlue}│ ${BGCOLOR}             MASUKKAN NAMA KAMU         ${NC}${BIBlue} │${NC}"
 echo -e "${BIBlue}╰══════════════════════════════════════════╯${NC}"
@@ -46,11 +50,11 @@ until [[ $name =~ ^[a-zA-Z0-9_.-]+$ ]]; do
 done
 rm -rf /etc/profil
 echo "$name" > /etc/profil
-username=$(cat /etc/username)
-profil=$(cat /etc/profil)
+username=$(cat /etc/xray/username)
+profil=$(cat /etc/profil)           
 author="$username dan $profil"
-echo ""
 clear
+echo ""
 echo "Author: $author"
 echo ""
 cd
