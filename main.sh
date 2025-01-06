@@ -29,6 +29,7 @@ URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
 export IP=$( curl -sS icanhazip.com )
 clear
+echo "══TomattoVPN_TUNNELING══" > /etc/xray/username
 clear && clear && clear
 clear;clear;clear
 echo -e "${BIBlue}╭══════════════════════════════════════════╮${NC}"
@@ -37,29 +38,18 @@ echo -e "${BIBlue}╰═══════════════════�
 echo ""
 sleep 4
 clear
-default_username="TomattoVPN TUNNELING"
-echo "$default_username" > /etc/xray/username
-if [[ ! -s /etc/xray/username ]]; then
-  echo "Gagal menulis ke /etc/xray/username. Memeriksa hak akses..."
-  exit 1
-fi
-clear
-echo " "
 echo -e "${BIBlue}╭══════════════════════════════════════════╮${NC}"
 echo -e "${BIBlue}│ ${BGCOLOR}             MASUKKAN NAMA KAMU         ${NC}${BIBlue} │${NC}"
 echo -e "${BIBlue}╰══════════════════════════════════════════╯${NC}"
 echo " "
 until [[ $name =~ ^[a-zA-Z0-9_.-]+$ ]]; do
-  read -rp "Masukan Nama Kamu Disini tanpa spasi : " -e name
+read -rp "Masukan Nama Kamu Disini tanpa spasi : " -e name
 done
 rm -rf /etc/profil
 echo "$name" > /etc/profil
-username=$(cat /etc/xray/username)
-profil=$(cat /etc/profil)
-author="$username dan $profil"
-clear
 echo ""
-echo "Author: $author"
+clear
+author=$(cat /etc/profil)
 echo ""
 cd
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
