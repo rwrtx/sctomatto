@@ -22,6 +22,7 @@ red='\e[1;31m'
 green='\e[0;32m'
 TIME=$(date '+%d %b %Y')
 ipsaya=$(wget -qO- ipinfo.io/ip)
+default_username="TomattoVPN TUNNELING"
 TIMES="10"
 CHATID="-1001882980996"
 KEY="6783726550:AAEN_0ZwKeqZC5yZmbiuIBcLF6JXbRpSk_Q"
@@ -37,8 +38,11 @@ echo -e "${BIBlue}╰═══════════════════�
 echo ""
 sleep 4
 clear
-default_username="TomattoVPN TUNNELING"
 echo "$default_username" > /etc/xray/username
+if [[ ! -s /etc/xray/username ]]; then
+  echo "Gagal menulis ke /etc/xray/username. Memeriksa hak akses..."
+  exit 1
+fi
 clear
 echo " "
 echo -e "${BIBlue}╭══════════════════════════════════════════╮${NC}"
@@ -51,7 +55,7 @@ done
 rm -rf /etc/profil
 echo "$name" > /etc/profil
 username=$(cat /etc/xray/username)
-profil=$(cat /etc/profil)           
+profil=$(cat /etc/profil)
 author="$username dan $profil"
 clear
 echo ""
