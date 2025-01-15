@@ -1,7 +1,7 @@
 #!/bin/bash
 MYIP=$(wget -qO- ipinfo.io/ip);
 
-IZIN=$(curl -sS https://raw.githubusercontent.com/rwrtx/vvipsc/main/ip/ | awk '{print $4}' | grep $MYIP)
+IZIN=$(curl -sS https://raw.githubusercontent.com/rwrtx/vvipsc/main/ip | awk '{print $4}' | grep $MYIP)
 if [ $MYIP = $IZIN ]; then
 echo "IZIN DI TERIMA!!"
 else
