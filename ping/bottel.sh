@@ -1,31 +1,14 @@
+
 #!/bin/bash
 MYIP=$(wget -qO- ipinfo.io/ip);
 
-data_ip="https://raw.githubusercontent.com/rwrtx/vvipsc/main/ip"
-checking_sc() {
-  useexp=$(wget -qO- $data_ip | grep $ipsaya | awk '{print $3}')
-  if [[ $date_list < $useexp ]]; then
-    echo -ne
-    clear
-  fi
-}
+IZIN=$(curl -sS https://raw.githubusercontent.com/rwrtx/vvipsc/main/ip | awk '{print $4}' | grep $MYIP)
+if [ $MYIP = $IZIN ]; then
 echo "IZIN DI TERIMA!!"
 else
 clear
 figlet "Akses di tolak!! Silakan Hubungi Admin" | lolcat
-    echo ""
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    echo -e ""
-    echo -e "            \033[91;1mPERMISSION DENIED !\033[0m"
-    echo -e "   \033[0;33mYour VPS\033[0m $ipsaya \033[0;33mHas been Banned\033[0m"
-    echo -e "     \033[0;33mBuy access permissions for scripts\033[0m"
-    echo -e "             \033[0;33mContact Admin :\033[0m"
-    echo -e "      \033[2;32mTelegram\033[0m https://t.me/TomattoVPN"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    sleep 15
-    menu
+exit 0
 fi
 
 #install
@@ -180,16 +163,14 @@ wget -q -O /usr/bin/cek-mws "https://raw.githubusercontent.com/rwrtx/sctomatto/m
 wget -q -O /usr/bin/cek-mvs "https://raw.githubusercontent.com/rwrtx/sctomatto/main/ping/cek-mvs.sh" && chmod +x /usr/bin/cek-mvs
 
 
-wget -q -O /usr/bin/cek-mss "https://raw.githubusercontent.com/king-vpn/next/memek/bot/cek-mss.sh" && chmod +x /usr/bin/cek-mss
+wget -q -O /usr/bin/cek-mss "https://raw.githubusercontent.com/rwrtx/sctomatto/main/ping/cek-mss.sh" && chmod +x /usr/bin/cek-mss
 
 
 
-wget -q -O /usr/bin/cek-mts "https://raw.githubusercontent.com/king-vpn/next/memek/bot/cek-mts.sh" && chmod +x /usr/bin/cek-mts
+wget -q -O /usr/bin/cek-mts "https://raw.githubusercontent.com/rwrtx/sctomatto/main/ping/cek-mts.sh" && chmod +x /usr/bin/cek-mts
 
 cp /tmp/var.txt /media/cybervpn
 
 echo " Installations complete, type /menu on your bot "
 
 rm /media/cybervpn.zip
-#in
-#out
