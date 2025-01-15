@@ -24,9 +24,8 @@ figlet "Akses di tolak!! Silakan Hubungi Admin" | lolcat
     echo -e "             \033[0;33mContact Admin :\033[0m"
     echo -e "      \033[2;32mTelegram\033[0m https://t.me/TomattoVPN"
     echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    sleep 10
-	reboot
-exit 0
+    sleep 15
+    menu
 fi
 
 #install
