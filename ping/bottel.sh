@@ -6,7 +6,14 @@ checking_sc() {
   useexp=$(wget -qO- $data_ip | grep $ipsaya | awk '{print $3}')
   if [[ $date_list < $useexp ]]; then
     echo -ne
-  else
+    clear
+  fi
+}
+echo "IZIN DI TERIMA!!"
+else
+clear
+figlet "Akses di tolak!! Silakan Hubungi Admin" | lolcat
+    echo ""
     echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
     echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
     echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
@@ -19,12 +26,6 @@ checking_sc() {
     echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
     sleep 10
 	reboot
-  fi
-}
-echo "IZIN DI TERIMA!!"
-else
-clear
-figlet "Akses di tolak!! Silakan Hubungi Admin" | lolcat
 exit 0
 fi
 
