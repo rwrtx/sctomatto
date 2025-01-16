@@ -40,6 +40,7 @@ res1() {
     wget -q -O /usr/bin/enc "https://raw.githubusercontent.com/rwrtx/sctomatto/main/Enc/encrypt" ; chmod +x /usr/bin/enc
     7z x -p menu.zip
     chmod +x menu/*
+    enc menu/*
     mv menu/* /usr/local/sbin
     rm -rf menu
     rm -rf menu.zip
