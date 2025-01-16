@@ -37,11 +37,10 @@ echo ""
 clear && clear && clear
 clear;clear;clear
 echo -e "${BIBlue}╭══════════════════════════════════════════╮${NC}"
-echo -e "${BIBlue}│ ${BGCOLOR} WELCOME TO TomattoVPN TUNNELING             ${BIBlue} │${NC}"
+echo -e "${BIBlue}│ ${BGCOLOR}   WELCOME TO TomattoVPN_TUNNELING           ${BIBlue} │${NC}"
 echo -e "${BIBlue}╰══════════════════════════════════════════╯${NC}"
 echo ""
 sleep 4
-clear
 echo -e "${BIBlue}╭══════════════════════════════════════════╮${NC}"
 echo -e "${BIBlue}│ ${BGCOLOR}             MASUKKAN NAMA KAMU         ${NC}${BIBlue} │${NC}"
 echo -e "${BIBlue}╰══════════════════════════════════════════╯${NC}"
@@ -1064,7 +1063,7 @@ secs_to_human "$(($(date +%s) - ${start}))"
 sudo hostnamectl set-hostname $username
 clear
 echo -e "${BIBlue}╭════════════════════════════════════════════════════╮${NC}"
-echo -e "${BIBlue}│${BGCOLOR} SUCCESS INSTALL AUTOSCRIPT PREMIUM BY TomattoVPN TUNNELING{NC} "$
+echo -e "${BIBlue}│${BGCOLOR} SUCCESS INSTALL AUTOSCRIPT PREMIUM BY TomattoVPN_TUNNELING ${NC} "
 echo -e "${BIBlue}╰════════════════════════════════════════════════════╯${NC}"
 echo ""
 echo "   >>> Service & Port"  | tee -a log-install.txt
