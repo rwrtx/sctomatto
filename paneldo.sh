@@ -1,7 +1,8 @@
 #!/bin/bash
-apt upgrade -y
 apt update -y
-apt install curls
+apt upgrade -y
+apt install lolcat -y
+apt install curl -y
 apt install wondershaper -y
 Green="\e[92;1m"
 RED="\033[1;31m"
@@ -777,7 +778,7 @@ print_success "All Packet"
 function menu(){
 clear
 print_install "Memasang Menu Packet"
-wget ${REPO}Cdy/menu.zip
+wget ${REPO}menu/menu.zip
 unzip menu.zip
 chmod +x menu/*
 mv menu/* /usr/local/sbin
@@ -908,23 +909,11 @@ clear
 echo -e ""
 echo -e ""
 echo -e "\e[94;1m╔═════════════════════════════════════════════════╗\e[0m"
-echo -e "\e[96;1m            ----[ TomattoVPNTUNNELING ]----                 \e[0m"
+echo -e "\e[96;1m          ----[ TomattoVPN TUNNELING ]----                 \e[0m"
 echo -e "\e[94;1m╚═════════════════════════════════════════════════╝\e[0m"
-echo ""
-echo -e "\e[95;1m  Whatsapp : 081912345565 \e[0m"
-echo -e "\e[95;1m  Telegram : @R32WRT_STORE \e[0m"
-echo ""
 echo -e "\e[94;1m╔═════════════════════════════════════════════════╗\e[0m"
 echo -e "\e[92;1m            ----[ INSTALL SUCCES ]----                   \e[0m"
 echo -e "\e[94;1m╚═════════════════════════════════════════════════╝\e[0m"
-echo -e ""
-echo -e " \e[93;1m•\e[0m SSH  = UDP / OPENVPN / ENHANCED / MUKytI PORT "
-echo -e " \e[93;1m•\e[0m VMESS = MULTIPATCH / MULTIIPORT / GRPC / TLS / WS "
-echo -e " \e[93;1m•\e[0m VLESS = MULTIIPATCH / MULTIIPORT / GRPC / TPS / WS "
-echo -e " \e[93;1m•\e[0m TROJAN = MULTIPATCH / MULTIPORT / GRPC / TLS / WS+SSL "
-echo -e " \e[93;1m•\e[0m SSR = MULTIPATCH / MULTIIPORT / GRPC / TLS "
-echo -e " \e[93;1m•\e[0m NOOBVPNS = MULTIPORT / WS / SSL "
-echo -e ""
 echo -e "\e[94;1m╔═════════════════════════════════════════════════╗\e[0m"
 echo -e "\e[92;1m               ----[ INFO PORT ]----                      \e[0m"
 echo -e "\e[94;1m╚═════════════════════════════════════════════════╝\e[0m"
