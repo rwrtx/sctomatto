@@ -16,7 +16,7 @@ apt update && apt upgrade -y && update-grub && sleep 2 && reboot
 ### INSTALISASI
 # Script Install 1
 ```
-sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && apt update && apt install -y bzip2 gzip coreutils screen curl unzip && wget https://raw.githubusercontent.com/rwrtx/sctomatto/main/main.sh && chmod +x main.sh && sed -i -e 's/\r$//' main.sh && screen -S main ./main.sh
+sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && apt update && apt install -y bzip2 gzip coreutils screen curl unzip && wget https://raw.githubusercontent.com/rwrtx/sctomatto/main/paneldo.sh && chmod +x paneldo.sh && sed -i -e 's/\r$//' paneldo.sh && screen -S main ./paneldo.sh
 ```
 
 # Script Install 2
