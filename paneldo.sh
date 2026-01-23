@@ -18,6 +18,12 @@ GRAY="\e[1;30m"
 NC='\e[0m'
 red='\e[1;31m'
 green='\e[0;32m'
+BlueBee="\e[94;1m"
+CYAN="\e[96;1m"
+COLOR1="\e[92;1m"
+NET=$(ip route | awk '/default/ {print $5; exit}')
+valid=$(date +"%Y-%m-%d")
+password_default(){ :; }
 TIME=$(date '+%d %b %Y')
 ipsaya=$(wget -qO- ipinfo.io/ip)
 TIMES="10"
@@ -191,30 +197,37 @@ export Kernel=$( uname -r )
 export Arch=$( uname -m )
 export IP=$( curl -s https://ipinfo.io/ip/ )
 function first_setup(){
-timedatectl set-timezone Asia/Jakarta
-echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
-echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
-print_success "Directory Xray"
-if [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "ubuntu" ]]; then
-echo "Setup Dependencies $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')"
-sudo apt update -y
-apt-get install --no-install-recommends software-properties-common
-add-apt-repository ppa:vbernat/haproxy-2.0 -y
-apt-get -y install haproxy=2.0.\*
-elif [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "debian" ]]; then
-echo "Setup Dependencies For OS Is $(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')"
-curl https://haproxy.debian.net/bernat.debian.org.gpg |
-gpg --dearmor >/usr/share/keyrings/haproxy.debian.net.gpg
-echo deb "[signed-by=/usr/share/keyrings/haproxy.debian.net.gpg]" \
-http://haproxy.debian.net buster-backports-1.8 main \
->/etc/apt/sources.list.d/haproxy.list
-sudo apt-get update
-apt-get -y install haproxy=1.8.\*
-else
-echo -e " Your OS Is Not Supported ($(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g') )"
-exit 1
-fi
+  clear
+  print_install "Initial System Setup"
+
+  # Timezone
+  timedatectl set-timezone Asia/Jakarta
+
+  # Iptables persistent auto-save
+  echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
+  echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
+
+  # Deteksi OS
+  OS_ID=$(grep -w ID /etc/os-release | head -n1 | cut -d= -f2 | tr -d '"')
+  OS_NAME=$(grep -w PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '"')
+
+  echo "Setup dependencies for $OS_NAME"
+
+  # Paket dasar yang dibutuhkan haproxy & repo
+  apt install -y software-properties-common curl gnupg lsb-release
+
+  # ==============================
+  # INSTALL HAPROXY (CLEAN WAY)
+  # ==============================
+  echo "Installing HAProxy from official OS repository"
+  apt install -y haproxy
+
+  # Enable haproxy service
+  systemctl enable haproxy
+
+  print_success "Base system & HAProxy installed"
 }
+
 clear
 function nginx_install() {
 if [[ $(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g') == "ubuntu" ]]; then
@@ -233,8 +246,6 @@ print_install "Menginstall Packet Yang Dibutuhkan"
 apt install at -y
 apt install zip pwgen openssl netcat socat cron bash-completion -y
 apt install figlet -y
-apt update -y
-apt upgrade -y
 apt dist-upgrade -y
 systemctl enable chronyd
 systemctl restart chronyd
@@ -352,9 +363,9 @@ domain=$(cat /root/domain)
 STOPWEBSERVER=$(lsof -i:80 | cut -d' ' -f1 | awk 'NR==2 {print $1}')
 rm -rf /root/.acme.sh
 mkdir /root/.acme.sh
-systemctl stop $STOPWEBSERVER
-systemctl stop nginx
-curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+systemctl stop nginx || true
+systemctl stop apache2 || true
+curl https://get.acme.sh | sh -o /root/.acme.sh/acme.sh
 chmod +x /root/.acme.sh/acme.sh
 /root/.acme.sh/acme.sh --upgrade --auto-upgrade
 /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
@@ -509,10 +520,10 @@ print_success "Password SSH"
 function udp_mini(){
 clear
 print_install "Memasang Service limit Quota"
-wget raw.githubusercontent.com/rwrtx/sctomatto/Fls/limit.sh && chmod +x limit.sh && ./limit.sh
+wget raw.githubusercontent.com/rwrtx/sctomatto/main/Fls/limit.sh && chmod +x limit.sh && ./limit.sh
 cd
 wget -q -O /usr/bin/limit-ip "${REPO}Fls/limit-ip"
-chmod +x /usr/bin/*
+chmod +x /usr/bin/limit-ip
 cd /usr/bin
 sed -i 's/\r//' limit-ip
 cd
@@ -696,7 +707,6 @@ clear
 print_install "Menginstall Fail2ban (VPN Safe)"
 
 # Install Fail2ban
-apt update -y
 apt install -y fail2ban
 
 # Banner SSH & Dropbear
