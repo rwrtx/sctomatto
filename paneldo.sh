@@ -1,4 +1,8 @@
 #!/bin/bash
+systemctl stop apt-daily.service apt-daily-upgrade.service >/dev/null 2>&1
+systemctl disable apt-daily.service apt-daily-upgrade.service >/dev/null 2>&1
+sleep 2
+dpkg --configure -a >/dev/null 2>&1
 apt update -y
 apt upgrade -y
 apt install lolcat -y
