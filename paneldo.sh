@@ -872,7 +872,6 @@ echo enable service noobzvpns
 systemctl enable noobzvpns &>/dev/null
 print_success "NOOBZVPNS BY TomattoVPN TUNNELING OFFICIAL"
 }
-}
 function ins_restart(){
 clear
 print_install "Restarting  All Packet"
