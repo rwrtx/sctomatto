@@ -359,75 +359,50 @@ curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$T
 }
 clear
 function pasang_ssl() {
-clear
-print_install "Memasang SSL Pada Domain"
+  clear
+  print_install "Memasang SSL Pada Domain"
 
-# =========================
-# VALIDASI DOMAIN
-# =========================
-if [ ! -s /root/domain ]; then
-  echo "❌ Domain belum diset. Jalankan menu domain dulu."
-  exit 1
-fi
+  [ ! -s /root/domain ] && echo "❌ Domain belum diset" && exit 1
+  domain=$(cat /root/domain)
 
-domain=$(cat /root/domain)
+  IPVPS=$(curl -s ipv4.icanhazip.com)
+  DOMAIN_IP=$(getent ahostsv4 "$domain" | awk '{print $1}' | head -n1)
 
-# =========================
-# VALIDASI DNS DOMAIN
-# =========================
-IPVPS=$(curl -s ipv4.icanhazip.com)
-DOMAIN_IP=$(getent ahostsv4 "$domain" | awk '{print $1}' | head -n1)
+  [ "$IPVPS" != "$DOMAIN_IP" ] && {
+    echo "❌ Domain tidak mengarah ke IP VPS"
+    exit 1
+  }
 
-if [ "$IPVPS" != "$DOMAIN_IP" ]; then
-  echo "❌ Domain $domain tidak mengarah ke IP VPS ($IPVPS)"
-  echo "   Domain IP: $DOMAIN_IP"
-  exit 1
-fi
+  systemctl stop nginx haproxy apache2 2>/dev/null
+  fuser -k 80/tcp >/dev/null 2>&1
 
-# =========================
-# STOP SERVICE PORT 80
-# =========================
-systemctl stop nginx haproxy apache2 2>/dev/null
-fuser -k 80/tcp >/dev/null 2>&1
+  rm -rf /root/.acme.sh
+  curl https://get.acme.sh | sh
+  ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
 
-# =========================
-# INSTALL ACME.SH
-# =========================
-rm -rf /root/.acme.sh
-curl https://get.acme.sh | sh
-~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+  ~/.acme.sh/acme.sh --issue -d "$domain" --standalone -k ec-256
 
-# =========================
-# ISSUE SSL
-# =========================
-~/.acme.sh/acme.sh --issue -d "$domain" --standalone -k ec-256
+  ACME_CERT="/root/.acme.sh/${domain}_ecc/fullchain.cer"
+  ACME_KEY="/root/.acme.sh/${domain}_ecc/${domain}.key"
 
-# =========================
-# VALIDASI SSL
-# =========================
-if [ ! -f "/etc/xray/xray.crt" ]; then
-  echo "❌ SSL gagal diterbitkan."
-  exit 1
-fi
+  if [ ! -f "$ACME_CERT" ]; then
+    echo "❌ SSL gagal diterbitkan"
+    exit 1
+  fi
 
-# =========================
-# INSTALL CERT
-# =========================
-mkdir -p /etc/xray
-~/.acme.sh/acme.sh --installcert -d "$domain" \
-  --fullchainpath /etc/xray/xray.crt \
-  --keypath /etc/xray/xray.key \
-  --ecc
+  mkdir -p /etc/xray /etc/haproxy
 
-chmod 600 /etc/xray/xray.key
+  ~/.acme.sh/acme.sh --installcert -d "$domain" \
+    --fullchainpath /etc/xray/xray.crt \
+    --keypath /etc/xray/xray.key \
+    --ecc
 
-# =========================
-# BUAT HAPROXY PEM
-# =========================
-cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/hap.pem
-chmod 600 /etc/haproxy/hap.pem
+  chmod 600 /etc/xray/xray.key
 
-print_success "SSL Certificate Installed"
+  cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/hap.pem
+  chmod 600 /etc/haproxy/hap.pem
+
+  print_success "SSL Certificate Installed"
 }
 
 function make_folder_xray() {
