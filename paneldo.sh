@@ -359,56 +359,24 @@ curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$T
 }
 clear
 function pasang_ssl() {
-  clear
-  print_install "Memasang SSL Pada Domain"
-
-  if [ ! -s /root/domain ]; then
-    print_error "Domain belum diset"
-    exit 1
-  fi
-
-  domain=$(cat /root/domain)
-  IPVPS=$(curl -s ipv4.icanhazip.com)
-  DOMAIN_IP=$(getent ahostsv4 "$domain" | awk '{print $1}' | head -n1)
-
-  if [ "$IPVPS" != "$DOMAIN_IP" ]; then
-    print_error "Domain tidak mengarah ke IP VPS"
-    print_error "IP VPS: $IPVPS | IP Domain: $DOMAIN_IP"
-    exit 1
-  fi
-
-  systemctl stop nginx haproxy apache2 2>/dev/null
-  fuser -k 80/tcp >/dev/null 2>&1
-
-  rm -rf /root/.acme.sh
-  curl https://get.acme.sh | sh
-  ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-
-  ~/.acme.sh/acme.sh --issue -d "$domain" --standalone -k ec-256
-
-  ACME_DIR="/root/.acme.sh/${domain}_ecc"
-
-  if [ ! -f "$ACME_DIR/fullchain.cer" ]; then
-    print_error "ACME tidak menghasilkan sertifikat"
-    exit 1
-  fi
-
-  mkdir -p /etc/xray /etc/haproxy
-
-  ~/.acme.sh/acme.sh --installcert -d "$domain" \
-    --fullchainpath /etc/xray/xray.crt \
-    --keypath /etc/xray/xray.key \
-    --ecc
-
-  if [ ! -f /etc/xray/xray.crt ] || [ ! -f /etc/xray/xray.key ]; then
-    print_error "Install cert gagal"
-    exit 1
-  fi
-
-  cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/hap.pem
-  chmod 600 /etc/xray/xray.key /etc/haproxy/hap.pem
-
-  print_success "SSL berhasil dipasang"
+clear
+print_install "Memasang SSL Pada Domain"
+rm -rf /etc/xray/xray.key
+rm -rf /etc/xray/xray.crt
+domain=$(cat /root/domain)
+STOPWEBSERVER=$(lsof -i:80 | cut -d' ' -f1 | awk 'NR==2 {print $1}')
+rm -rf /root/.acme.sh
+mkdir /root/.acme.sh
+systemctl stop $STOPWEBSERVER
+systemctl stop nginx
+curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+chmod +x /root/.acme.sh/acme.sh
+/root/.acme.sh/acme.sh --upgrade --auto-upgrade
+/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+/root/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
+~/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
+chmod 777 /etc/xray/xray.key
+print_success "SSL Certificate"
 }
 
 function make_folder_xray() {
