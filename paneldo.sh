@@ -481,9 +481,13 @@ wget -O /etc/nginx/conf.d/xray.conf "${REPO}Cfg/xray.conf" >/dev/null 2>&1
 sed -i "s/xxx/${domain}/g" /etc/haproxy/haproxy.cfg
 sed -i "s/xxx/${domain}/g" /etc/nginx/conf.d/xray.conf
 curl ${REPO}Cfg/nginx.conf > /etc/nginx/nginx.conf
+# pastikan hap.pem selalu ada
 if [ -f /etc/xray/xray.crt ] && [ -f /etc/xray/xray.key ]; then
   cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/hap.pem
   chmod 600 /etc/haproxy/hap.pem
+else
+  print_error "SSL belum ada saat konfigurasi haproxy"
+  exit 1
 fi
 chmod +x /etc/systemd/system/runn.service
 rm -rf /etc/systemd/system/xray.service.d
@@ -1011,21 +1015,34 @@ fi
 print_success "Menu Packet"
 }
 function enable_services(){
-clear
-print_install "Enable Service"
-systemctl daemon-reload
-systemctl start netfilter-persistent
-systemctl enable --now rc-local
-systemctl enable --now cron
-systemctl enable --now netfilter-persistent
-nginx -t && systemctl restart nginx
-systemctl restart xray
-systemctl restart cron
-haproxy -c -f /etc/haproxy/haproxy.cfg && systemctl restart haproxy
-systemctl restart noobzvpns
-print_success "Enable Service"
-clear
+  clear
+  print_install "Enable Service"
+
+  systemctl daemon-reload
+  systemctl start netfilter-persistent
+  systemctl enable --now rc-local cron netfilter-persistent
+
+  if nginx -t; then
+    systemctl restart nginx
+  else
+    print_error "Config nginx invalid"
+    exit 1
+  fi
+
+  systemctl restart xray
+
+  if haproxy -c -f /etc/haproxy/haproxy.cfg; then
+    systemctl restart haproxy
+  else
+    print_error "Config haproxy invalid"
+    exit 1
+  fi
+
+  systemctl restart noobzvpns
+
+  print_success "Enable Service"
 }
+
 function instal(){
 clear
 first_setup
