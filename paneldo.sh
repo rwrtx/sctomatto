@@ -693,72 +693,90 @@ print_success "Swap 1 G"
 }
 function ins_Fail2ban(){
 clear
-print_install "Menginstall Fail2ban"
-if [ -d '/usr/local/ddos' ]; then
-echo; echo; echo "Please un-install the previous version first"
-exit 0
-else
-mkdir /usr/local/ddos
-fi
-clear
-echo "Banner /etc/banner.txt" >>/etc/ssh/sshd_config
+print_install "Menginstall Fail2ban (VPN Safe)"
+
+# Install Fail2ban
+apt update -y
+apt install -y fail2ban
+
+# Banner SSH & Dropbear
+echo "Banner /etc/banner.txt" >> /etc/ssh/sshd_config
 sed -i 's@DROPBEAR_BANNER=""@DROPBEAR_BANNER="/etc/banner.txt"@g' /etc/default/dropbear
-wget -O /etc/banner.txt "${REPO}Bnr/banner.txt"
+wget -q -O /etc/banner.txt "${REPO}Bnr/banner.txt"
 
-    
-    # Install dan Konfigurasi Fail2ban
-   # echo "Menginstal Fail2ban..."
-
-    # Instal Fail2ban
-    apt-get update
-    apt-get install -y fail2ban
-
-    # Konfigurasi Fail2ban untuk memantau log tertentu
-    cat <<EOF > /etc/fail2ban/jail.local
+# Konfigurasi Fail2ban (VPN SAFE)
+cat >/etc/fail2ban/jail.local <<'EOF'
 [DEFAULT]
-bantime = 3600
+bantime  = 1800
 findtime = 600
 maxretry = 5
 
-[sshd]
-enabled = true
-port    = ssh
-logpath = %(sshd_log)s
-backend = systemd
+ignoreip = 127.0.0.1/8 ::1 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
 
-[http-get-dos]
+backend = systemd
+banaction = iptables-multiport
+
+################################
+# SSH PROTECTION
+################################
+[sshd]
+enabled  = true
+port     = ssh
+logpath  = %(sshd_log)s
+maxretry = 5
+findtime = 600
+bantime  = 3600
+
+################################
+# SSH DDOS
+################################
+[sshd-ddos]
+enabled  = true
+port     = ssh
+logpath  = %(sshd_log)s
+maxretry = 10
+findtime = 120
+bantime  = 3600
+
+################################
+# NGINX AUTH (AMAN)
+################################
+[nginx-http-auth]
 enabled  = true
 port     = http,https
-filter   = http-get-dos
+logpath  = /var/log/nginx/error.log
+maxretry = 6
+
+################################
+# NGINX BOT SEARCH (AMAN)
+################################
+[nginx-botsearch]
+enabled  = true
+port     = http,https
 logpath  = /var/log/nginx/access.log
-maxretry = 200
-findtime = 200
-bantime  = 600
+maxretry = 10
+findtime = 300
+bantime  = 1800
 
+################################
+# RECIDIVE (IP BANDAL)
+################################
 [recidive]
-enabled = true
-logpath = /var/log/fail2ban.log
-action  = iptables-allports[name=recidive]
-bantime  = 604800  ; 1 week
-findtime = 86400   ; 1 day
+enabled  = true
+logpath  = /var/log/fail2ban.log
+banaction = iptables-allports[name=recidive]
+findtime = 86400
 maxretry = 5
+bantime  = 604800
 EOF
 
-    # Buat filter untuk HTTP GET DOS
-    cat <<EOF > /etc/fail2ban/filter.d/http-get-dos.conf
-[Definition]
-failregex = ^<HOST> -.*"(GET|POST).*
-ignoreregex =
-EOF
+# Restart & Enable Fail2ban
+systemctl restart fail2ban
+systemctl enable fail2ban
 
-    # Restart Fail2ban
-    systemctl restart fail2ban
-    systemctl enable fail2ban
-
- #   echo "Fail2ban diinstal dan dikonfigurasi."
- 
-print_success "Fail2ban"
+print_success "Fail2ban VPN-Safe Installed"
 }
+
 function ins_epro(){
 clear
 print_install "Menginstall ePro WebSocket Proxy"
@@ -796,81 +814,6 @@ cd
 apt autoclean -y >/dev/null 2>&1
 apt autoremove -y >/dev/null 2>&1
 print_success "ePro WebSocket Proxy"
-
-clear
-print_install "Menginstall UDP-CUSTOM"
-cd
-rm -rf /root/udp
-mkdir -p /root/udp
-
-# change to time GMT+7
-echo "change to time GMT+7"
-ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-
-# install udp-custom
-echo downloading udp-custom
-wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8" -O /root/udp/udp-custom && rm -rf /tmp/cookies.txt
-chmod +x /root/udp/udp-custom
-
-echo downloading default config
-wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM" -O /root/udp/config.json && rm -rf /tmp/cookies.txt
-chmod 644 /root/udp/config.json
-
-if [ -z "$1" ]; then
-cat <<EOF > /etc/systemd/system/udp-custom.service
-[Unit]
-Description=UDP Custom by ePro Dev. Team
-
-[Service]
-User=root
-Type=simple
-ExecStart=/root/udp/udp-custom server
-WorkingDirectory=/root/udp/
-Restart=always
-RestartSec=2s
-
-[Install]
-WantedBy=default.target
-EOF
-else
-cat <<EOF > /etc/systemd/system/udp-custom.service
-[Unit]
-Description=UDP Custom by ePro Dev. Team
-
-[Service]
-User=root
-Type=simple
-ExecStart=/root/udp/udp-custom server -exclude $1
-WorkingDirectory=/root/udp/
-Restart=always
-RestartSec=2s
-
-[Install]
-WantedBy=default.target
-EOF
-fi
-
-echo start service udp-custom
-systemctl start udp-custom &>/dev/null
-
-echo enable service udp-custom
-systemctl enable udp-custom &>/dev/null
-print_success "UDP-CUSTOM BY TomattoVPN TUNNELING OFFICIAL"
-clear
-print_install "MEMASANG NOOBZVPNS"
-cd
-apt install git -y
-git clone https://github.com/rifstore/noobzvpn.git
-cd noobzvpn/
-chmod +x install.sh
-./install.sh
-
-echo start service noobzvpns
-systemctl start noobzvpns &>/dev/null
-
-echo enable service noobzvpns
-systemctl enable noobzvpns &>/dev/null
-print_success "NOOBZVPNS BY TomattoVPN TUNNELING OFFICIAL"
 }
 function ins_restart(){
 clear
