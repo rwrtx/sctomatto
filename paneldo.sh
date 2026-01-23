@@ -362,16 +362,20 @@ function pasang_ssl() {
   clear
   print_install "Memasang SSL Pada Domain"
 
-  [ ! -s /root/domain ] && echo "❌ Domain belum diset" && exit 1
-  domain=$(cat /root/domain)
+  if [ ! -s /root/domain ]; then
+    print_error "Domain belum diset"
+    exit 1
+  fi
 
+  domain=$(cat /root/domain)
   IPVPS=$(curl -s ipv4.icanhazip.com)
   DOMAIN_IP=$(getent ahostsv4 "$domain" | awk '{print $1}' | head -n1)
 
-  [ "$IPVPS" != "$DOMAIN_IP" ] && {
-    echo "❌ Domain tidak mengarah ke IP VPS"
+  if [ "$IPVPS" != "$DOMAIN_IP" ]; then
+    print_error "Domain tidak mengarah ke IP VPS"
+    print_error "IP VPS: $IPVPS | IP Domain: $DOMAIN_IP"
     exit 1
-  }
+  fi
 
   systemctl stop nginx haproxy apache2 2>/dev/null
   fuser -k 80/tcp >/dev/null 2>&1
@@ -382,11 +386,10 @@ function pasang_ssl() {
 
   ~/.acme.sh/acme.sh --issue -d "$domain" --standalone -k ec-256
 
-  ACME_CERT="/root/.acme.sh/${domain}_ecc/fullchain.cer"
-  ACME_KEY="/root/.acme.sh/${domain}_ecc/${domain}.key"
+  ACME_DIR="/root/.acme.sh/${domain}_ecc"
 
-  if [ ! -f "$ACME_CERT" ]; then
-    echo "❌ SSL gagal diterbitkan"
+  if [ ! -f "$ACME_DIR/fullchain.cer" ]; then
+    print_error "ACME tidak menghasilkan sertifikat"
     exit 1
   fi
 
@@ -397,12 +400,15 @@ function pasang_ssl() {
     --keypath /etc/xray/xray.key \
     --ecc
 
-  chmod 600 /etc/xray/xray.key
+  if [ ! -f /etc/xray/xray.crt ] || [ ! -f /etc/xray/xray.key ]; then
+    print_error "Install cert gagal"
+    exit 1
+  fi
 
   cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/hap.pem
-  chmod 600 /etc/haproxy/hap.pem
+  chmod 600 /etc/xray/xray.key /etc/haproxy/hap.pem
 
-  print_success "SSL Certificate Installed"
+  print_success "SSL berhasil dipasang"
 }
 
 function make_folder_xray() {
