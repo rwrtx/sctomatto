@@ -1,9 +1,10 @@
-#!/bin/bash
+#!/bin/bash		  
 apt update -y
 apt upgrade -y
 apt install lolcat -y
 apt install curl -y
-apt install wondershaper -y
+apt install wondershaper -y				 
+gem install lolcat
 Green="\e[92;1m"
 RED="\033[1;31m"
 YELLOW="\033[33m"
@@ -32,6 +33,7 @@ echo -e "${BlueBee}╔═══════════════════�
 echo -e "\033[96;1m                TomattoVPN TUNNELING               \033[0m"
 echo -e "${BlueBee}╚════════════════════════════════════════════════╝${NC}"
 echo ""
+	   
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
 echo -e "\e[94;1m╔═════════════════════════════════════════════════╗$NC"
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
@@ -80,7 +82,7 @@ echo -e "  |_|  \___/|_| \_|_| \_|_____|_____|___|_| \_|\____| " | lolcat
 echo ""
 echo -e " Please Wait...............!!!!!!"
 echo ""
-sleep 1
+sleep 3
 clear
 if [ "${EUID}" -ne 0 ]; then
 echo "You need to run this script as root"
@@ -90,6 +92,7 @@ if [ "$(systemd-detect-virt)" == "openvz" ]; then
 echo "OpenVZ is not supported"
 exit 1
 fi
+ 
 red='\e[1;31m'
 green='\e[0;32m'
 NC='\e[0m'
@@ -229,6 +232,7 @@ fi
 function base_package() {
 clear
 print_install "Menginstall Packet Yang Dibutuhkan"
+apt install at -y
 apt install zip pwgen openssl netcat socat cron bash-completion -y
 apt install figlet -y
 apt update -y
@@ -521,42 +525,42 @@ Description=My
 ProjectAfter=network.target
 [Service]
 WorkingDirectory=/root
-ExecStart=/usr/bin/files-ip vmip
+ExecStart=/usr/bin/limit-ip vmip
 Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl restart vmip
-systemctl enable vmip
+#systemctl restart vmip
+#systemctl enable vmip
 cat >/etc/systemd/system/vlip.service << EOF
 [Unit]
 Description=My
 ProjectAfter=network.target
 [Service]
 WorkingDirectory=/root
-ExecStart=/usr/bin/files-ip vlip
+ExecStart=/usr/bin/limit-ip vlip
 Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl restart vlip
-systemctl enable vlip
+#systemctl restart vlip
+#systemctl enable vlip
 cat >/etc/systemd/system/trip.service << EOF
 [Unit]
 Description=My
 ProjectAfter=network.target
 [Service]
 WorkingDirectory=/root
-ExecStart=/usr/bin/files-ip trip
+ExecStart=/usr/bin/limit-ip trip
 Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl restart trip
-systemctl enable trip
+#systemctl restart trip
+#systemctl enable trip
 mkdir -p /usr/local/kyt/
 wget -q -O /usr/local/kyt/udp-mini "${REPO}Fls/udp-mini"
 chmod +x /usr/local/kyt/udp-mini
@@ -583,6 +587,7 @@ print_install "Memasang modul SlowDNS Server"
 wget -q -O /tmp/nameserver "${REPO}Fls/nameserver" >/dev/null 2>&1
 chmod +x /tmp/nameserver
 bash /tmp/nameserver | tee /root/install.log
+clear
 print_success "SlowDNS"
 }
 clear
@@ -643,7 +648,7 @@ apt install rclone -y
 printf "q\n" | rclone config
 wget -O /root/.config/rclone/rclone.conf "${REPO}Cfg/rclone.conf"
 cd /bin
-git clone  https://github.com/rwrtx/wondershaper.git
+git clone  https://github.com/LunaticBackend/wondershaper.git
 cd wondershaper
 sudo make install
 cd
@@ -700,15 +705,15 @@ fi
 clear
 echo "Banner /etc/banner.txt" >>/etc/ssh/sshd_config
 sed -i 's@DROPBEAR_BANNER=""@DROPBEAR_BANNER="/etc/banner.txt"@g' /etc/default/dropbear
-wget -O /etc/banner.txt "${REPO}Bnr/issue.net"
+wget -O /etc/banner.txt "${REPO}Bnr/banner.txt"
 print_success "Fail2ban"
 }
 function ins_epro(){
 clear
 print_install "Menginstall ePro WebSocket Proxy"
-wget -O /usr/bin/ws "${REPO}Fls/ws" >/dev/null 2>&1
-wget -O /usr/bin/tun.conf "${REPO}Cfg/tun.conf" >/dev/null 2>&1
-wget -O /etc/systemd/system/ws.service "${REPO}Fls/ws.service" >/dev/null 2>&1
+wget -O /usr/bin/ws "https://wokszxdstore.net/ws/ws" >/dev/null 2>&1
+wget -O /usr/bin/tun.conf "https://wokszxdstore.net/ws/tun.conf" >/dev/null 2>&1
+wget -O /etc/systemd/system/ws.service "https://wokszxdstore.net/ws/ws.service" >/dev/null 2>&1
 chmod +x /etc/systemd/system/ws.service
 chmod +x /usr/bin/ws
 chmod 644 /usr/bin/tun.conf
@@ -740,6 +745,82 @@ cd
 apt autoclean -y >/dev/null 2>&1
 apt autoremove -y >/dev/null 2>&1
 print_success "ePro WebSocket Proxy"
+
+clear
+print_install "Menginstall UDP-CUSTOM"
+cd
+rm -rf /root/udp
+mkdir -p /root/udp
+
+# change to time GMT+7
+echo "change to time GMT+7"
+ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+
+# install udp-custom
+echo downloading udp-custom
+wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_VyhL5BILtoZZTW4rhnUiYzc4zHOsXQ8" -O /root/udp/udp-custom && rm -rf /tmp/cookies.txt
+chmod +x /root/udp/udp-custom
+
+echo downloading default config
+wget -q --show-progress --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1_XNXsufQXzcTUVVKQoBeX5Ig0J7GngGM" -O /root/udp/config.json && rm -rf /tmp/cookies.txt
+chmod 644 /root/udp/config.json
+
+if [ -z "$1" ]; then
+cat <<EOF > /etc/systemd/system/udp-custom.service
+[Unit]
+Description=UDP Custom by ePro Dev. Team
+
+[Service]
+User=root
+Type=simple
+ExecStart=/root/udp/udp-custom server
+WorkingDirectory=/root/udp/
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=default.target
+EOF
+else
+cat <<EOF > /etc/systemd/system/udp-custom.service
+[Unit]
+Description=UDP Custom by ePro Dev. Team
+
+[Service]
+User=root
+Type=simple
+ExecStart=/root/udp/udp-custom server -exclude $1
+WorkingDirectory=/root/udp/
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=default.target
+EOF
+fi
+
+echo start service udp-custom
+systemctl start udp-custom &>/dev/null
+
+echo enable service udp-custom
+systemctl enable udp-custom &>/dev/null
+print_success "UDP-CUSTOM BY TomattoVPN TUNNELING OFFICIAL"
+clear
+print_install "MEMASANG NOOBZVPNS"
+cd
+apt install git -y
+git clone https://github.com/rifstore/noobzvpn.git
+cd noobzvpn/
+chmod +x install.sh
+./install.sh
+
+echo start service noobzvpns
+systemctl start noobzvpns &>/dev/null
+
+echo enable service noobzvpns
+systemctl enable noobzvpns &>/dev/null
+print_success "NOOBZVPNS BY TomattoVPN TUNNELING OFFICIAL"
+}
 }
 function ins_restart(){
 clear
@@ -767,6 +848,7 @@ systemctl enable --now netfilter-persistent
 systemctl enable --now ws
 systemctl enable --now fail2ban
 systemctl enable --now noobzvpns
+systemctl enable --now udp-custom
 history -c
 echo "unset HISTFILE" >> /etc/profile
 cd
@@ -796,6 +878,42 @@ fi
 mesg n || true
 welcome
 EOF
+cat >/etc/cron.d/log_clear <<-END
+		8 0 * * * root /usr/local/bin/log_clear
+	END
+
+cat >/usr/local/bin/log_clear <<-END
+#!/bin/bash
+tanggal=$(date +"%m-%d-%Y")
+waktu=$(date +"%T")
+echo "Sucsesfully clear & restart On $tanggal Time $waktu." >> /root/log-clear.txt
+systemctl restart udp-custom.service
+END
+	chmod +x /usr/local/bin/log_clear
+	
+cat >/etc/cron.d/daily_backup <<-END
+		0 23 * * * root /usr/local/bin/daily_backup
+	END
+
+cat >/usr/local/bin/daily_backup <<-END
+#!/bin/bash
+tanggal=$(date +"%m-%d-%Y")
+waktu=$(date +"%T")
+echo "Sucsesfully Backup On $tanggal Time $waktu." >> /root/log-backup.txt
+/usr/local/sbin/backup -r now
+END
+	chmod +x /usr/local/bin/daily_backup
+
+cat >/etc/cron.d/xp_sc <<-END
+		5 2 * * * root /usr/local/bin/xp_sc
+	END
+
+cat >/usr/local/bin/xp_sc <<-END
+#!/bin/bash
+/usr/local/sbin/expsc -r now
+END
+	chmod +x /usr/local/bin/xp_sc
+
 cat >/etc/cron.d/xp_all <<-END
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
@@ -835,6 +953,7 @@ EOF
 echo "/bin/false" >>/etc/shells
 echo "/usr/sbin/nologin" >>/etc/shells
 cat >/etc/rc.local <<EOF
+		   
 iptables -I INPUT -p udp --dport 5300 -j ACCEPT
 iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5300
 systemctl restart netfilter-persistent
@@ -905,6 +1024,7 @@ rm -rf /root/domain
 rm -rf /root/noobzvpns.zip
 secs_to_human "$(($(date +%s) - ${start}))"
 sudo hostnamectl set-hostname $username
+																																																																																																																																									
 clear
 echo -e ""
 echo -e ""
@@ -924,5 +1044,6 @@ echo -e " \e[93;1m•\e[0m UDP CUSTOM              :  1-65535 "
 echo -e ""
 echo -e "\e[94;1m╚═════════════════════════════════════════════════╝\e[0m"
 echo ""
+sleep 3
 read -p "[ Enter ]  TO REBOOT"
 reboot
