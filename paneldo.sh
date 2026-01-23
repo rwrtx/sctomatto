@@ -1,8 +1,4 @@
 #!/bin/bash
-systemctl stop apt-daily.service apt-daily-upgrade.service >/dev/null 2>&1
-systemctl disable apt-daily.service apt-daily-upgrade.service >/dev/null 2>&1
-sleep 2
-dpkg --configure -a >/dev/null 2>&1
 apt update -y
 apt upgrade -y
 apt install lolcat -y
@@ -361,23 +357,75 @@ clear
 function pasang_ssl() {
 clear
 print_install "Memasang SSL Pada Domain"
-rm -rf /etc/xray/xray.key
-rm -rf /etc/xray/xray.crt
+
+# =========================
+# VALIDASI DOMAIN
+# =========================
+if [ ! -s /root/domain ]; then
+  echo "❌ Domain belum diset. Jalankan menu domain dulu."
+  exit 1
+fi
+
 domain=$(cat /root/domain)
-STOPWEBSERVER=$(lsof -i:80 | cut -d' ' -f1 | awk 'NR==2 {print $1}')
+
+# =========================
+# VALIDASI DNS DOMAIN
+# =========================
+IPVPS=$(curl -s ipv4.icanhazip.com)
+DOMAIN_IP=$(getent ahostsv4 "$domain" | awk '{print $1}' | head -n1)
+
+if [ "$IPVPS" != "$DOMAIN_IP" ]; then
+  echo "❌ Domain $domain tidak mengarah ke IP VPS ($IPVPS)"
+  echo "   Domain IP: $DOMAIN_IP"
+  exit 1
+fi
+
+# =========================
+# STOP SERVICE PORT 80
+# =========================
+systemctl stop nginx haproxy apache2 2>/dev/null
+fuser -k 80/tcp >/dev/null 2>&1
+
+# =========================
+# INSTALL ACME.SH
+# =========================
 rm -rf /root/.acme.sh
-mkdir /root/.acme.sh
-systemctl stop nginx || true
-systemctl stop apache2 || true
-curl https://get.acme.sh | sh -o /root/.acme.sh/acme.sh
-chmod +x /root/.acme.sh/acme.sh
-/root/.acme.sh/acme.sh --upgrade --auto-upgrade
-/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-/root/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
-~/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
-chmod 777 /etc/xray/xray.key
-print_success "SSL Certificate"
+curl https://get.acme.sh | sh
+~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+
+# =========================
+# ISSUE SSL
+# =========================
+~/.acme.sh/acme.sh --issue -d "$domain" --standalone -k ec-256
+
+# =========================
+# VALIDASI SSL
+# =========================
+if [ ! -f "/etc/xray/xray.crt" ]; then
+  echo "❌ SSL gagal diterbitkan."
+  exit 1
+fi
+
+# =========================
+# INSTALL CERT
+# =========================
+mkdir -p /etc/xray
+~/.acme.sh/acme.sh --installcert -d "$domain" \
+  --fullchainpath /etc/xray/xray.crt \
+  --keypath /etc/xray/xray.key \
+  --ecc
+
+chmod 600 /etc/xray/xray.key
+
+# =========================
+# BUAT HAPROXY PEM
+# =========================
+cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/hap.pem
+chmod 600 /etc/haproxy/hap.pem
+
+print_success "SSL Certificate Installed"
 }
+
 function make_folder_xray() {
 rm -rf /etc/vmess/.vmess.db
 rm -rf /etc/vless/.vless.db
@@ -448,7 +496,10 @@ wget -O /etc/nginx/conf.d/xray.conf "${REPO}Cfg/xray.conf" >/dev/null 2>&1
 sed -i "s/xxx/${domain}/g" /etc/haproxy/haproxy.cfg
 sed -i "s/xxx/${domain}/g" /etc/nginx/conf.d/xray.conf
 curl ${REPO}Cfg/nginx.conf > /etc/nginx/nginx.conf
-cat /etc/xray/xray.crt /etc/xray/xray.key | tee /etc/haproxy/hap.pem
+if [ -f /etc/xray/xray.crt ] && [ -f /etc/xray/xray.key ]; then
+  cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/hap.pem
+  chmod 600 /etc/haproxy/hap.pem
+fi
 chmod +x /etc/systemd/system/runn.service
 rm -rf /etc/systemd/system/xray.service.d
 cat >/etc/systemd/system/xray.service <<EOF
@@ -982,10 +1033,10 @@ systemctl start netfilter-persistent
 systemctl enable --now rc-local
 systemctl enable --now cron
 systemctl enable --now netfilter-persistent
-systemctl restart nginx
+nginx -t && systemctl restart nginx
 systemctl restart xray
 systemctl restart cron
-systemctl restart haproxy
+haproxy -c -f /etc/haproxy/haproxy.cfg && systemctl restart haproxy
 systemctl restart noobzvpns
 print_success "Enable Service"
 clear
@@ -1025,7 +1076,6 @@ rm -rf /root/*.zip
 rm -rf /root/*.sh
 rm -rf /root/LICENSE
 rm -rf /root/README.md
-rm -rf /root/domain
 rm -rf /root/noobzvpns.zip
 secs_to_human "$(($(date +%s) - ${start}))"
 sudo hostnamectl set-hostname $username
