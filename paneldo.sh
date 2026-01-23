@@ -696,12 +696,12 @@ print_success "OpenVPN"
 }
 function ins_backup(){
 clear
-print_install "Memasang Backup Server"
+#print_install "Memasang Backup Server"
 apt install rclone -y
 printf "q\n" | rclone config
 wget -O /root/.config/rclone/rclone.conf "${REPO}Cfg/rclone.conf"
 cd /bin
-git clone  https://github.com/LunaticBackend/wondershaper.git
+git clone https://github.com/arivpnstores/wondershaper.git
 cd wondershaper
 sudo make install
 cd
@@ -724,17 +724,17 @@ logfile ~/.msmtp.log
 EOF
 chown -R www-data:www-data /etc/msmtprc
 wget -q -O /etc/ipserver "${REPO}Fls/ipserver" && bash /etc/ipserver
-print_success "Backup Server"
+#print_success "Backup Server"
 }
 clear
 function ins_swab(){
 clear
-print_install "Memasang Swap 1 G"
+#print_install "Memasang Swap 2 GB"
 gotop_latest="$(curl -s https://api.github.com/repos/xxxserxxx/gotop/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
 gotop_link="https://github.com/xxxserxxx/gotop/releases/download/v$gotop_latest/gotop_v"$gotop_latest"_linux_amd64.deb"
 curl -sL "$gotop_link" -o /tmp/gotop.deb
 dpkg -i /tmp/gotop.deb >/dev/null 2>&1
-dd if=/dev/zero of=/swapfile bs=1024 count=1048576
+dd if=/dev/zero of=/swapfile bs=1M count=2048
 mkswap /swapfile
 chown root:root /swapfile
 chmod 0600 /swapfile >/dev/null 2>&1
@@ -744,7 +744,7 @@ chronyd -q 'server 0.id.pool.ntp.org iburst'
 chronyc sourcestats -v
 chronyc tracking -v
 wget ${REPO}Fls/bbr.sh &&  chmod +x bbr.sh && ./bbr.sh
-print_success "Swap 1 G"
+#print_success "Swap 2 GB"
 }
 function ins_Fail2ban(){
 clear
