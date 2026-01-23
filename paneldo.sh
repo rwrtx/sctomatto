@@ -1,9 +1,9 @@
-#!/bin/bash		  
+#!/bin/bash
 apt update -y
 apt upgrade -y
 apt install lolcat -y
 apt install curl -y
-apt install wondershaper -y				 
+apt install wondershaper -y
 gem install lolcat
 Green="\e[92;1m"
 RED="\033[1;31m"
@@ -33,7 +33,6 @@ echo -e "${BlueBee}╔═══════════════════�
 echo -e "\033[96;1m                TomattoVPN TUNNELING               \033[0m"
 echo -e "${BlueBee}╚════════════════════════════════════════════════╝${NC}"
 echo ""
-	   
 if [[ $( uname -m | awk '{print $1}' ) == "x86_64" ]]; then
 echo -e "\e[94;1m╔═════════════════════════════════════════════════╗$NC"
 echo -e "${OK} Your Architecture Is Supported ( ${green}$( uname -m )${NC} )"
@@ -92,7 +91,6 @@ if [ "$(systemd-detect-virt)" == "openvz" ]; then
 echo "OpenVZ is not supported"
 exit 1
 fi
- 
 red='\e[1;31m'
 green='\e[0;32m'
 NC='\e[0m'
@@ -293,7 +291,7 @@ echo -e "\e[94;1m╚════════════════════
 echo ""
 echo ""
 read -p "   INPUT YOUR DOMAIN :   " host1
-echo "IP=" >> /var/lib/kyt/ipvps.conf
+echo "IP=${host1}" >> /var/lib/kyt/ipvps.conf
 echo $host1 > /etc/xray/domain
 echo $host1 > /root/domain
 echo ""
@@ -706,14 +704,67 @@ clear
 echo "Banner /etc/banner.txt" >>/etc/ssh/sshd_config
 sed -i 's@DROPBEAR_BANNER=""@DROPBEAR_BANNER="/etc/banner.txt"@g' /etc/default/dropbear
 wget -O /etc/banner.txt "${REPO}Bnr/banner.txt"
+
+    
+    # Install dan Konfigurasi Fail2ban
+   # echo "Menginstal Fail2ban..."
+
+    # Instal Fail2ban
+    apt-get update
+    apt-get install -y fail2ban
+
+    # Konfigurasi Fail2ban untuk memantau log tertentu
+    cat <<EOF > /etc/fail2ban/jail.local
+[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 5
+
+[sshd]
+enabled = true
+port    = ssh
+logpath = %(sshd_log)s
+backend = systemd
+
+[http-get-dos]
+enabled  = true
+port     = http,https
+filter   = http-get-dos
+logpath  = /var/log/nginx/access.log
+maxretry = 200
+findtime = 200
+bantime  = 600
+
+[recidive]
+enabled = true
+logpath = /var/log/fail2ban.log
+action  = iptables-allports[name=recidive]
+bantime  = 604800  ; 1 week
+findtime = 86400   ; 1 day
+maxretry = 5
+EOF
+
+    # Buat filter untuk HTTP GET DOS
+    cat <<EOF > /etc/fail2ban/filter.d/http-get-dos.conf
+[Definition]
+failregex = ^<HOST> -.*"(GET|POST).*
+ignoreregex =
+EOF
+
+    # Restart Fail2ban
+    systemctl restart fail2ban
+    systemctl enable fail2ban
+
+ #   echo "Fail2ban diinstal dan dikonfigurasi."
+ 
 print_success "Fail2ban"
 }
 function ins_epro(){
 clear
 print_install "Menginstall ePro WebSocket Proxy"
-wget -O /usr/bin/ws "https://wokszxdstore.net/ws/ws" >/dev/null 2>&1
-wget -O /usr/bin/tun.conf "https://wokszxdstore.net/ws/tun.conf" >/dev/null 2>&1
-wget -O /etc/systemd/system/ws.service "https://wokszxdstore.net/ws/ws.service" >/dev/null 2>&1
+wget -O /usr/bin/ws "${REPO}Fls/ws" >/dev/null 2>&1
+wget -O /usr/bin/tun.conf "${REPO}Cfg/tun.conf" >/dev/null 2>&1
+wget -O /etc/systemd/system/ws.service "${REPO}Fls/ws.service" >/dev/null 2>&1
 chmod +x /etc/systemd/system/ws.service
 chmod +x /usr/bin/ws
 chmod 644 /usr/bin/tun.conf
@@ -913,7 +964,6 @@ cat >/usr/local/bin/xp_sc <<-END
 /usr/local/sbin/expsc -r now
 END
 	chmod +x /usr/local/bin/xp_sc
-
 cat >/etc/cron.d/xp_all <<-END
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
@@ -953,7 +1003,6 @@ EOF
 echo "/bin/false" >>/etc/shells
 echo "/usr/sbin/nologin" >>/etc/shells
 cat >/etc/rc.local <<EOF
-		   
 iptables -I INPUT -p udp --dport 5300 -j ACCEPT
 iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5300
 systemctl restart netfilter-persistent
@@ -1024,7 +1073,6 @@ rm -rf /root/domain
 rm -rf /root/noobzvpns.zip
 secs_to_human "$(($(date +%s) - ${start}))"
 sudo hostnamectl set-hostname $username
-																																																																																																																																									
 clear
 echo -e ""
 echo -e ""
