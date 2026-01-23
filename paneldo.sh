@@ -306,7 +306,7 @@ echo -e "\e[94;1m╚════════════════════
 echo ""
 echo ""
 read -p "   INPUT YOUR DOMAIN :   " host1
-echo "IP=${host1}" >> /var/lib/kyt/ipvps.conf
+echo "IP=" >> /var/lib/kyt/ipvps.conf
 echo $host1 > /etc/xray/domain
 echo $host1 > /root/domain
 echo ""
@@ -578,42 +578,42 @@ Description=My
 ProjectAfter=network.target
 [Service]
 WorkingDirectory=/root
-ExecStart=/usr/bin/limit-ip vmip
+ExecStart=/usr/bin/files-ip vmip
 Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-#systemctl restart vmip
-#systemctl enable vmip
+systemctl restart vmip
+systemctl enable vmip
 cat >/etc/systemd/system/vlip.service << EOF
 [Unit]
 Description=My
 ProjectAfter=network.target
 [Service]
 WorkingDirectory=/root
-ExecStart=/usr/bin/limit-ip vlip
+ExecStart=/usr/bin/files-ip vlip
 Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-#systemctl restart vlip
-#systemctl enable vlip
+systemctl restart vlip
+systemctl enable vlip
 cat >/etc/systemd/system/trip.service << EOF
 [Unit]
 Description=My
 ProjectAfter=network.target
 [Service]
 WorkingDirectory=/root
-ExecStart=/usr/bin/limit-ip trip
+ExecStart=/usr/bin/files-ip trip
 Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-#systemctl restart trip
-#systemctl enable trip
+systemctl restart trip
+systemctl enable trip
 mkdir -p /usr/local/kyt/
 wget -q -O /usr/local/kyt/udp-mini "${REPO}Fls/udp-mini"
 chmod +x /usr/local/kyt/udp-mini
@@ -757,7 +757,7 @@ apt install -y fail2ban
 echo "Banner /etc/banner.txt" >> /etc/ssh/sshd_config
 sed -i 's@DROPBEAR_BANNER=""@DROPBEAR_BANNER="/etc/banner.txt"@g' /etc/default/dropbear
 wget -q -O /etc/banner.txt "${REPO}Bnr/banner.txt"
-
+wget -O /etc/kyt.txt "${REPO}banner/issue.net"
 # Konfigurasi Fail2ban (VPN SAFE)
 cat >/etc/fail2ban/jail.local <<'EOF'
 [DEFAULT]
