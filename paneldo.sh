@@ -429,40 +429,84 @@ echo "& plughin Account" >>/etc/noobzvpns/.noobzvpns.db
 }
 function install_xray() {
 clear
-print_install "Installing Xray Core (Latest Stable)"
-domainSock_dir="/run/xray";! [ -d $domainSock_dir ] && mkdir  $domainSock_dir
-chown www-data.www-data $domainSock_dir
-latest_version="$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
-bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u www-data --version $latest_version
+print_install "Installing Xray Core (Locked v24.12.31)"
+
+XRAY_VERSION="24.12.31"
+ARCH=$(uname -m)
+
+# Deteksi arsitektur
+if [[ "$ARCH" == "x86_64" ]]; then
+  FILE="Xray-linux-64.zip"
+elif [[ "$ARCH" == "aarch64" ]]; then
+  FILE="Xray-linux-arm64-v8a.zip"
+else
+  print_error "Architecture not supported for Xray"
+  exit 1
+fi
+
+cd /tmp
+rm -rf xray*
+wget -q https://github.com/XTLS/Xray-core/releases/download/v${XRAY_VERSION}/${FILE}
+unzip -o ${FILE}
+
+# Backup kalau sudah ada xray
+if [ -f /usr/local/bin/xray ]; then
+  mv /usr/local/bin/xray /usr/local/bin/xray.bak
+fi
+
+cp xray /usr/local/bin/xray
+chmod +x /usr/local/bin/xray
+
+# Pastikan user & folder
+domainSock_dir="/run/xray"
+mkdir -p $domainSock_dir
+chown www-data:www-data $domainSock_dir
+
+# Ambil config seperti biasa
 wget -O /etc/xray/config.json "${REPO}Cfg/config.json" >/dev/null 2>&1
 wget -O /etc/files/config.json "${NOOBZJSON}config.json" >/dev/null 2>&1
 wget -O /etc/systemd/system/runn.service "${REPO}Fls/runn.service" >/dev/null 2>&1
+
 domain=$(cat /etc/xray/domain)
 IPVS=$(cat /etc/xray/ipvps)
-print_success "Xray Core Installed (v$latest_version)"
+
+print_success "Xray Core Installed (LOCKED v$XRAY_VERSION)"
+
 clear
 curl -s ipinfo.io/city >>/etc/xray/city
 curl -s ipinfo.io/org | cut -d " " -f 2-10 >>/etc/xray/isp
+
 print_install "Memasang Konfigurasi Packet"
 wget -O /etc/haproxy/haproxy.cfg "${REPO}Cfg/haproxy.cfg" >/dev/null 2>&1
 wget -O /etc/nginx/conf.d/xray.conf "${REPO}Cfg/xray.conf" >/dev/null 2>&1
 sed -i "s/xxx/${domain}/g" /etc/haproxy/haproxy.cfg
 sed -i "s/xxx/${domain}/g" /etc/nginx/conf.d/xray.conf
 curl ${REPO}Cfg/nginx.conf > /etc/nginx/nginx.conf
-# pastikan hap.pem selalu ada
+
+# Gabung sertifikat untuk haproxy kalau ada
 if [ -f /etc/xray/xray.crt ] && [ -f /etc/xray/xray.key ]; then
   cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/hap.pem
   chmod 600 /etc/haproxy/hap.pem
+  echo "SSL ada, HAProxy siap"
 else
-  print_error "SSL belum ada saat konfigurasi haproxy"
-  exit 1
+  echo "SSL belum ada, coba buat lewat acme"
+  pasang_ssl
+
+  if [ -f /etc/xray/xray.crt ] && [ -f /etc/xray/xray.key ]; then
+    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/hap.pem
+    chmod 600 /etc/haproxy/hap.pem
+    echo "SSL berhasil dibuat"
+  else
+    echo "SSL tetap belum ada, lanjut tanpa HAProxy"
+  fi
 fi
+
 chmod +x /etc/systemd/system/runn.service
-rm -rf /etc/systemd/system/xray.service.d
+
 cat >/etc/systemd/system/xray.service <<EOF
-Description=Xray Service
-Documentation=https://github.com
+Description=Xray Service (Locked v24)
 After=network.target nss-lookup.target
+
 [Service]
 User=www-data
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
@@ -471,12 +515,18 @@ NoNewPrivileges=true
 ExecStart=/usr/local/bin/xray run -config /etc/xray/config.json
 Restart=on-failure
 RestartPreventExitStatus=23
-filesNPROC=10000
-filesNOFILE=1000000
+LimitNPROC=10000
+LimitNOFILE=1000000
+
 [Install]
 WantedBy=multi-user.target
 EOF
-print_success "Konfigurasi Packet"
+
+systemctl daemon-reload
+systemctl restart xray
+systemctl enable xray
+
+print_success "Xray v24 Locked & Running"
 }
 function ssh(){
 clear
