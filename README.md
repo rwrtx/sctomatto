@@ -22,9 +22,9 @@ Pastikan anda menggunakan OS yang sesuai agar instalasi berjalan lancar dan stab
 ## 🖼️ OS Logo
 
 <p align="center">
-  <img src="https://assets.ubuntu.com/v1/29985a98-ubuntu-logo32.png" alt="Ubuntu" height="40"/>
+  <img src="https://assets.ubuntu.com/v1/29985a98-ubuntu-logo32.png" alt="Ubuntu" height="140"/>
   &nbsp;&nbsp;&nbsp;
-  <img src="https://www.debian.org/logos/openlogo-nd-50.png" alt="Debian" height="40"/>
+  <img src="https://www.debian.org/logos/openlogo-nd-50.png" alt="Debian" height="140"/>
 </p>
 
 ---
