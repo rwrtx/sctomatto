@@ -18,15 +18,7 @@ Pastikan anda menggunakan OS yang sesuai agar instalasi berjalan lancar dan stab
 | 🔴 CentOS / Alma / Rocky / Arch / Alpine | Tidak Support |
 
 ---
-
-## 🖼️ OS
-
-<p align="center">
-  <img src="https://assets.ubuntu.com/v1/29985a98-ubuntu-logo32.png" alt="Ubuntu" height="140"/>
-  &nbsp;&nbsp;&nbsp;
-  <img src="https://www.debian.org/logos/openlogo-nd-50.png" alt="Debian" height="140"/>
-</p>
-
+### Script X-SMART by:Tomatto
 ---
 ### UPDATE UNTUK DEBIAN
 Masukkan perintah dibawah jika anda menggunakan OS Debian Version 9 atau 10
@@ -40,12 +32,12 @@ apt update && apt upgrade -y && update-grub && sleep 2 && reboot
 ```
 
 ### INSTALISASI
-# Script Install 1
+# Script Install 1 -Lastest
 ```
-sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && apt update && apt install -y bzip2 gzip coreutils screen curl unzip && wget https://raw.githubusercontent.com/rwrtx/sctomatto/main/paneldo.sh && chmod +x paneldo.sh && sed -i -e 's/\r$//' paneldo.sh && screen -S main ./paneldo.sh
+sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && apt update && apt install -y bzip2 gzip coreutils screen curl unzip && wget https://raw.githubusercontent.com/rwrtx/sctomatto/main/V2-stable.sh && chmod +x V2-stable.sh && sed -i -e 's/\r$//' V2-stable.sh && screen -S main ./V2-stable.sh
 ```
 
-# Script Install 2
+# Script Install 2 -Old
 ```
 apt install -y && apt update -y && apt upgrade -y && sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && wget -q https://raw.githubusercontent.com/rwrtx/sctomatto/main/main.sh && chmod +x main.sh && ./main.sh
 ```
