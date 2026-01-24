@@ -397,18 +397,18 @@ mkdir -p /etc/ssh
 mkdir -p /usr/bin/xray/
 mkdir -p /var/log/xray/
 mkdir -p /var/www/html
-mkdir -p /etc/kyt/files/vmess/ip
-mkdir -p /etc/kyt/files/vless/ip
-mkdir -p /etc/kyt/files/trojan/ip
-mkdir -p /etc/kyt/files/ssh/ip
-mkdir -p /etc/files/vmess
-mkdir -p /etc/files/vless
-mkdir -p /etc/files/trojan
-mkdir -p /etc/files/ssh
+mkdir -p /etc/kyt/limit/vmess/ip
+mkdir -p /etc/kyt/limit/vless/ip
+mkdir -p /etc/kyt/limit/trojan/ip
+mkdir -p /etc/kyt/limit/ssh/ip
+mkdir -p /etc/limit/vmess
+mkdir -p /etc/limit/vless
+mkdir -p /etc/limit/trojan
+mkdir -p /etc/limit/ssh
 mkdir -p /etc/noobzvpns
-mkdir -p /etc/files/noobzvpns/ip
-mkdir -p /etc/files/noobzvpns/quota
-mkdir -p /etc/files/noobzvpns
+mkdir -p /etc/limit/noobzvpns/ip
+mkdir -p /etc/limit/noobzvpns/quota
+mkdir -p /etc/limit/noobzvpns
 chmod +x /var/log/xray
 touch /etc/xray/domain
 touch /var/log/xray/access.log
@@ -429,7 +429,7 @@ echo "& plughin Account" >>/etc/noobzvpns/.noobzvpns.db
 }
 function install_xray() {
 clear
-print_install "Core Xray 1.8.1 Latest Version"
+print_install "Installing Xray Core (Latest Stable)"
 domainSock_dir="/run/xray";! [ -d $domainSock_dir ] && mkdir  $domainSock_dir
 chown www-data.www-data $domainSock_dir
 latest_version="$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
@@ -439,7 +439,7 @@ wget -O /etc/files/config.json "${NOOBZJSON}config.json" >/dev/null 2>&1
 wget -O /etc/systemd/system/runn.service "${REPO}Fls/runn.service" >/dev/null 2>&1
 domain=$(cat /etc/xray/domain)
 IPVS=$(cat /etc/xray/ipvps)
-print_success "Core Xray 1.8.1 Latest Version"
+print_success "Xray Core Installed (v$latest_version)"
 clear
 curl -s ipinfo.io/city >>/etc/xray/city
 curl -s ipinfo.io/org | cut -d " " -f 2-10 >>/etc/xray/isp
@@ -546,7 +546,7 @@ Description=My
 ProjectAfter=network.target
 [Service]
 WorkingDirectory=/root
-ExecStart=/usr/bin/files-ip vmip
+ExecStart=/usr/bin/limit-ip vmip
 Restart=always
 [Install]
 WantedBy=multi-user.target
@@ -560,7 +560,7 @@ Description=My
 ProjectAfter=network.target
 [Service]
 WorkingDirectory=/root
-ExecStart=/usr/bin/files-ip vlip
+ExecStart=/usr/bin/limit-ip vlip
 Restart=always
 [Install]
 WantedBy=multi-user.target
@@ -574,7 +574,7 @@ Description=My
 ProjectAfter=network.target
 [Service]
 WorkingDirectory=/root
-ExecStart=/usr/bin/files-ip trip
+ExecStart=/usr/bin/limit-ip trip
 Restart=always
 [Install]
 WantedBy=multi-user.target
