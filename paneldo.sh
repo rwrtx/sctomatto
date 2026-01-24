@@ -89,7 +89,7 @@ echo -e "  | | | | | |  \| |  \| |  _| | |    | ||  \| | |  _ " | lolcat
 echo -e "  | | | |_| | |\  | |\  | |___| |___ | || |\  | |_| | " | lolcat
 echo -e "  |_|  \___/|_| \_|_| \_|_____|_____|___|_| \_|\____| " | lolcat
 echo ""
-echo -e " Please Wait...............!!!!!!"
+echo -e "\e[32mPlease Wait...............!!!!!!\e[0m"
 echo ""
 sleep 3
 clear
@@ -658,7 +658,7 @@ print_success "Vnstat"
 function ins_openvpn(){
 clear
 print_install "Menginstall OpenVPN"
-wget ${REPO}Fls/openvpn &&  chmod +x openvpn && ./openvpn
+wget ${REPO}Vpn/openvpn &&  chmod +x openvpn && ./openvpn
 /etc/init.d/openvpn restart
 print_success "OpenVPN"
 }
