@@ -18,7 +18,8 @@ Pastikan anda menggunakan OS yang sesuai agar instalasi berjalan lancar dan stab
 | 🔴 CentOS / Alma / Rocky / Arch / Alpine | Tidak Support |
 
 ---
-### Script X-SMART by:Tomatto
+### Script X-SMART by: Tomatto
+### Thanks To : Bayy
 ---
 ### UPDATE UNTUK DEBIAN
 Masukkan perintah dibawah jika anda menggunakan OS Debian Version 9 atau 10
