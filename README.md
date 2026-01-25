@@ -22,12 +22,12 @@ Pastikan anda menggunakan OS yang sesuai agar instalasi berjalan lancar dan stab
 ### Thanks To : Bayy
 ---
 ### UPDATE UNTUK DEBIAN
-Masukkan perintah dibawah jika anda menggunakan OS Debian Version 9 atau 10
+Masukkan perintah dibawah jika anda menggunakan OS Debian Version 10,11 atau 10
 ```
 apt update -y && apt upgrade -y && apt dist-upgrade -y && reboot
 ```
 ### UPDATE UNTUK UBUNTU
-Masukkan perintah dibawah jika anda menggunakan OS Ubuntu Version 18 atau 20
+Masukkan perintah dibawah jika anda menggunakan OS Ubuntu Version 20 atau 22
 ```
 apt update && apt upgrade -y && update-grub && sleep 2 && reboot
 ```
