@@ -146,7 +146,7 @@ IP="${MYIP}"
 export IP
 
 # Telegram (boleh isi manual / via ENV)
-: "${TIMES:=10}"
+: "${TIMES:10}"
 : "${CHATID:5423129090}"
 : "${KEY:8308467181:AAG_3Ve3XBjr4_rX86gmNcmi9o-WXbVLcqo}"
 URL="https://api.telegram.org/bot${KEY}/sendMessage"
