@@ -161,7 +161,7 @@ echo -e "${OK} OS          : ${Green}${OS_PRETTY}${NC}"
 echo -e "${OK} IP          : ${Green}${IP}${NC}"
 echo -e "\e[94;1m╚═════════════════════════════════════════════════╝ $NC"
 echo -e ""
-read -rp "[ Enter ] TO REBOOT: " _
+read -rp "[ Enter ] TO INSTAL....... : " _
 sleep 1
 clear
 # =========================
