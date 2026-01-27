@@ -146,11 +146,10 @@ IP="${MYIP}"
 export IP
 
 # Telegram (boleh isi manual / via ENV)
-: "${TIMES:10}"
-: "${CHATID:5423129090}"
-: "${KEY:8308467181:AAG_3Ve3XBjr4_rX86gmNcmi9o-WXbVLcqo}"
+TIMES="10"
+CHATID="5423129090"          # <-- chat id kamu
+KEY="8308467181:AAG_3Ve3XBjr4_rX86gmNcmi9o-WXbVLcqo"  # <-- bot token kamu
 URL="https://api.telegram.org/bot${KEY}/sendMessage"
-
 clear
 echo -e "${BlueBee}╔════════════════════════════════════════════════╗${NC}"
 echo -e "\033[96;1m                TomattoVPN TUNNELING               \033[0m"
