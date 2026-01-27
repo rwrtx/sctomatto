@@ -89,6 +89,8 @@ echo -e "  | | | | | |  \| |  \| |  _| | |    | ||  \| | |  _ " | lolcat
 echo -e "  | | | |_| | |\  | |\  | |___| |___ | || |\  | |_| | " | lolcat
 echo -e "  |_|  \___/|_| \_|_| \_|_____|_____|___|_| \_|\____| " | lolcat
 echo ""
+echo -e "\e[32mPlease Wait...............!!!!!!\e[0m"
+echo ""
 sleep 3
 clear
 if [ "${EUID}" -ne 0 ]; then
@@ -174,35 +176,30 @@ fi
 }
 print_install "Membuat direktori xray"
 mkdir -p /etc/xray
-curl -sS ifconfig.me > /etc/xray/ipvps || true
+curl -s ifconfig.me > /etc/xray/ipvps
 touch /etc/xray/domain
 mkdir -p /var/log/xray
-chown -R www-data:www-data /var/log/xray || true
-chmod 755 /var/log/xray
-touch /var/log/xray/access.log /var/log/xray/error.log
+chown www-data.www-data /var/log/xray
+chmod +x /var/log/xray
+touch /var/log/xray/access.log
+touch /var/log/xray/error.log
 mkdir -p /var/lib/kyt >/dev/null 2>&1
-
-# FIX: init variabel sebelum dipakai (lebih aman)
-mem_used=0
-mem_total=0
 while IFS=":" read -r a b; do
-  case $a in
-    "MemTotal") ((mem_used+=${b/kB})); mem_total="${b/kB}" ;;
-    "Shmem") ((mem_used+=${b/kB})) ;;
-    "MemFree" | "Buffers" | "Cached" | "SReclaimable")
-      mem_used="$((mem_used-=${b/kB}))"
-    ;;
-  esac
+case $a in
+"MemTotal") ((mem_used+=${b/kB})); mem_total="${b/kB}" ;;
+"Shmem") ((mem_used+=${b/kB}))  ;;
+"MemFree" | "Buffers" | "Cached" | "SReclaimable")
+mem_used="$((mem_used-=${b/kB}))"
+;;
+esac
 done < /proc/meminfo
-
 Ram_Usage="$((mem_used / 1024))"
 Ram_Total="$((mem_total / 1024))"
-
-export tanggal="$(date -d "0 days" +"%d-%m-%Y - %X")"
-export OS_Name="$(grep -w PRETTY_NAME /etc/os-release | head -n1 | cut -d= -f2- | tr -d '"')"
-export Kernel="$(uname -r)"
-export Arch="$(uname -m)"
-export IP="$(curl -sS https://ipinfo.io/ip/ || true)"
+export tanggal=`date -d "0 days" +"%d-%m-%Y - %X" `
+export OS_Name=$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/PRETTY_NAME//g' | sed 's/=//g' | sed 's/"//g' )
+export Kernel=$( uname -r )
+export Arch=$( uname -m )
+export IP=$( curl -s https://ipinfo.io/ip/ )
 function first_setup(){
   clear
   print_install "Initial System Setup"
@@ -248,54 +245,31 @@ echo -e " Your OS Is Not Supported ( ${YELLOW}$(cat /etc/os-release | grep -w PR
 fi
 }
 function base_package() {
-  clear
-  print_install "Menginstall Packet Yang Dibutuhkan"
-
-  apt install -y at zip pwgen openssl netcat socat cron bash-completion figlet git sudo debconf-utils
-
-  apt dist-upgrade -y
-
-  # Ruby (tetap)
-  apt install -y ruby ruby-dev rubygems-integration || true
-
-  # ASLI: systemctl enable chronyd (sering gak ada -> script stop)
-  # FIX : amanin dengan try
-  apt install -y chrony ntpdate
-  systemctl_try enable chrony
-  systemctl_try restart chrony
-  systemctl_try enable chronyd
-  systemctl_try restart chronyd
-
-  cmd_try chronyc sourcestats -v
-  cmd_try chronyc tracking -v
-  cmd_try ntpdate pool.ntp.org
-
-  # Buang mail server & firewall bawaan (tetap)
-  apt-get remove --purge -y exim4 || true
-  apt-get remove --purge -y ufw firewalld || true
-
-  apt-get install -y --no-install-recommends software-properties-common
-
-  echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
-  echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
-
-  # Paket besar (tetap, tapi buat kompatibel Debian/Ubuntu)
-  apt-get install -y \
-    speedtest-cli vnstat libnss3-dev libnspr4-dev pkg-config libpam0g-dev \
-    libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison make \
-    libnss3-tools libevent-dev bc rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev \
-    sed dirmngr libxml-parser-perl build-essential gcc g++ \
-    python3 python3-pip \
-    htop lsof tar wget curl zip unzip p7zip-full \
-    libc6 util-linux msmtp-mta ca-certificates bsd-mailx \
-    iptables iptables-persistent netfilter-persistent net-tools openssl \
-    gnupg gnupg2 lsb-release shc cmake screen socat xz-utils apt-transport-https \
-    dnsutils cron bash-completion ntpdate chrony jq openvpn easy-rsa
-
-  apt-get clean -y || true
-  apt-get autoremove -y || true
-
-  print_success "Packet Yang Dibutuhkan"
+clear
+print_install "Menginstall Packet Yang Dibutuhkan"
+apt install at -y
+apt install zip pwgen openssl netcat socat cron bash-completion -y
+apt install figlet -y
+apt dist-upgrade -y
+systemctl enable chronyd
+systemctl restart chronyd
+systemctl enable chrony
+systemctl restart chrony
+chronyc sourcestats -v
+chronyc tracking -v
+apt install ntpdate -y
+ntpdate pool.ntp.org
+apt install sudo -y
+sudo apt-get clean all
+sudo apt-get autoremove -y
+sudo apt-get install -y debconf-utils
+sudo apt-get remove --purge exim4 -y
+sudo apt-get remove --purge ufw firewalld -y
+sudo apt-get install -y --no-install-recommends software-properties-common
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
+sudo apt-get install -y speedtest-cli vnstat libnss3-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison make libnss3-tools libevent-dev bc rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev sed dirmngr libxml-parser-perl build-essential gcc g++ python htop lsof tar wget curl ruby zip unzip p7zip-full python3-pip libc6 util-linux build-essential msmtp-mta ca-certificates bsd-mailx iptables iptables-persistent netfilter-persistent net-tools openssl ca-certificates gnupg gnupg2 ca-certificates lsb-release gcc shc make cmake git screen socat xz-utils apt-transport-https gnupg1 dnsutils cron bash-completion ntpdate chrony jq openvpn easy-rsa
+print_success "Packet Yang Dibutuhkan"
 }
 clear
 function pasang_domain() {
@@ -380,7 +354,7 @@ TEXT="
 <b> ❖ TomattoVPN  TUNNELING ❖  </b>
 <code>────────────────────</code>
 <i>Automatic Notifications From Github</i>
-"'&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://t.me/TomattoID"}]]}' 
+"'&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://t.me/"}]]}' 
 curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
 }
 clear
@@ -456,55 +430,84 @@ echo "& plughin Account" >>/etc/noobzvpns/.noobzvpns.db
 # =========================
 # 12) Xray install (punyamu, dirapihin)
 # =========================
-function install_xray(){
+function install_xray() {
   clear
-  print_install "Installing Xray Core (Locked v24.12.31) + GeoIP/GeoSite + systemd"
+  print_install "Installing Xray Core (Locked v24.12.31) + GeoIP/GeoSite + systemd (clean)"
 
-  local XRAY_VERSION="24.12.31"
-  local ARCH_FILE=""
+  XRAY_VERSION="24.12.31"
+  ARCH="$(uname -m)"
 
-  apt-get install -y curl wget unzip ca-certificates
+  # ---- tools minimal
+  apt-get update -y >/dev/null 2>&1
+  apt-get install -y curl wget unzip ca-certificates >/dev/null 2>&1
 
+  # ---- pastikan user service ada (kalau kamu tetap mau pakai www-data)
   if ! id -u www-data >/dev/null 2>&1; then
     useradd -r -s /usr/sbin/nologin -M www-data
   fi
 
-  case "$(uname -m)" in
-    x86_64)  ARCH_FILE="Xray-linux-64.zip" ;;
-    aarch64) ARCH_FILE="Xray-linux-arm64-v8a.zip" ;;
-    *) die "Architecture not supported for Xray: $(uname -m)" ;;
+  # ---- arsitektur
+  local FILE=""
+  case "$ARCH" in
+    x86_64)  FILE="Xray-linux-64.zip" ;;
+    aarch64) FILE="Xray-linux-arm64-v8a.zip" ;;
+    *) print_error "Architecture not supported for Xray: $ARCH"; exit 1 ;;
   esac
 
-  install -d -m 755 /etc/xray /usr/local/share/xray /var/log/xray
+  # ---- folder penting
+  install -d -m 755 /etc/xray
+  install -d -m 755 /usr/local/share/xray
+  install -d -m 755 /var/log/xray
 
-  local ZIP="/tmp/${ARCH_FILE}"
-  rm -f "$ZIP" /tmp/xray
+  # ---- download & install xray binary (lebih aman pakai nama spesifik)
+  local ZIP="/tmp/${FILE}"
+  rm -f "$ZIP" /tmp/xray /tmp/geoip.dat /tmp/geosite.dat
 
-  wget -q -O "$ZIP" "https://github.com/XTLS/Xray-core/releases/download/v${XRAY_VERSION}/${ARCH_FILE}"
+  wget -q -O "$ZIP" "https://github.com/XTLS/Xray-core/releases/download/v${XRAY_VERSION}/${FILE}" || {
+    print_error "Failed download Xray zip"; exit 1;
+  }
+
   unzip -o "$ZIP" -d /tmp >/dev/null 2>&1
-  [ -f /tmp/xray ] || die "Binary xray tidak ditemukan setelah unzip."
+  if [ ! -f /tmp/xray ]; then
+    print_error "Binary xray not found after unzip: ${FILE}"
+    exit 1
+  fi
 
+  # backup binary lama (kalau ada)
   if [ -f /usr/local/bin/xray ]; then
     mv /usr/local/bin/xray "/usr/local/bin/xray.bak.$(date +%s)"
   fi
+
   install -m 755 /tmp/xray /usr/local/bin/xray
 
+  # ---- GeoIP & GeoSite (wajib kalau config pakai geoip:/geosite:)
   print_install "Downloading GeoIP & GeoSite"
-  wget -q -O /usr/local/share/xray/geoip.dat   "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
-  wget -q -O /usr/local/share/xray/geosite.dat "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
+  wget -q -O /usr/local/share/xray/geoip.dat   "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat" || {
+    print_error "Failed download geoip.dat"; exit 1;
+  }
+  wget -q -O /usr/local/share/xray/geosite.dat "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat" || {
+    print_error "Failed download geosite.dat"; exit 1;
+  }
 
+  # symlink agar cocok dengan config kamu (yang sebelumnya nyari /usr/local/bin/geoip.dat)
   ln -sf /usr/local/share/xray/geoip.dat   /usr/local/bin/geoip.dat
   ln -sf /usr/local/share/xray/geosite.dat /usr/local/bin/geosite.dat
+
   chmod 644 /usr/local/share/xray/geoip.dat /usr/local/share/xray/geosite.dat
   chmod 644 /usr/local/bin/geoip.dat /usr/local/bin/geosite.dat
 
+  # ---- tarik config (pastikan REPO/NOOBZJSON sudah terdefinisi sebelum fungsi dipanggil)
   print_install "Fetching configs"
-  wget -q -O /etc/xray/config.json "${REPO}Cfg/config.json"
+  wget -q -O /etc/xray/config.json "${REPO}Cfg/config.json" || {
+    print_error "Failed download /etc/xray/config.json"; exit 1;
+  }
 
+  # ---- permission yang benar
   chown -R www-data:www-data /etc/xray /var/log/xray /usr/local/share/xray
   chmod 755 /etc/xray /var/log/xray /usr/local/share/xray
   chmod 644 /etc/xray/config.json
 
+  # cert/key kalau ada
   if [ -f /etc/xray/xray.key ]; then
     chown www-data:www-data /etc/xray/xray.key
     chmod 600 /etc/xray/xray.key
@@ -514,6 +517,7 @@ function install_xray(){
     chmod 644 /etc/xray/xray.crt
   fi
 
+  # ---- systemd service (fail-fast pakai ExecStartPre test + cek asset)
   print_install "Writing systemd unit"
   cat >/etc/systemd/system/xray.service <<'EOF'
 [Unit]
@@ -529,11 +533,12 @@ CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 
+# fail-fast: pastikan file penting ada
 ExecStartPre=/usr/bin/test -r /etc/xray/config.json
 ExecStartPre=/usr/bin/test -r /usr/local/bin/geoip.dat
 ExecStartPre=/usr/bin/test -r /usr/local/bin/geosite.dat
-ExecStartPre=/usr/local/bin/xray run -test -config /etc/xray/config.json
 
+ExecStartPre=/usr/local/bin/xray run -test -config /etc/xray/config.json
 ExecStart=/usr/local/bin/xray run -config /etc/xray/config.json
 
 Restart=on-failure
@@ -547,14 +552,17 @@ EOF
 
   systemctl daemon-reload
 
-  runuser -u www-data -- /usr/local/bin/xray run -test -config /etc/xray/config.json >/dev/null 2>&1 || \
-    die "Xray config test FAILED as www-data. Cek: journalctl -u xray -b --no-pager | tail -200"
+  # test sebagai user service (biar kasus permission ketangkep)
+  sudo -u www-data /usr/local/bin/xray run -test -config /etc/xray/config.json >/dev/null 2>&1 || {
+    print_error "Xray config test FAILED as www-data. Cek: journalctl -u xray -b --no-pager | tail -200"
+    exit 1
+  }
 
-  systemctl enable --now xray
+  systemctl enable --now xray >/dev/null 2>&1
   systemctl restart xray
-  systemctl --no-pager -l status xray || true
 
-print_success "Xray v24 Locked & Running"
+  systemctl --no-pager -l status xray || true
+  print_success "Xray Installed + GeoIP/GeoSite OK + Service OK"
 }
 function ssh(){
 clear
