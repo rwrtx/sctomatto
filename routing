@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DIR="/etc/xray/menu"
+OUTB="$DIR/outbounds.jsonl"
+RULE="$DIR/rules.jsonl"
+BAL="$DIR/balancers.jsonl"
+
+mkdir -p "$DIR"
+touch "$OUTB" "$RULE" "$BAL"
+
+pause(){ read -rp "Enter untuk lanjut..."; }
+
+add_outbound_route(){
+  echo "Tambah outbound route (contoh ke VPS2/exit)."
+  read -rp "Tag outbound (contoh routing_us): " tag
+  read -rp "Protocol (vless/vmess/trojan/ss): " proto
+  read -rp "Address/IP: " addr
+  read -rp "Port: " port
+
+  # Sederhanakan: contoh VLESS (kamu bisa kembangin untuk vmess/trojan/ss)
+  if [[ "$proto" == "vless" ]]; then
+    read -rp "UUID: " uuid
+    read -rp "Security (none/tls): " sec
+    sni=""
+    [[ "$sec" == "tls" ]] && read -rp "SNI/ServerName (domain): " sni
+
+    cat >>"$OUTB" <<EOF
+{"tag":"$tag","protocol":"vless","settings":{"vnext":[{"address":"$addr","port":$port,"users":[{"id":"$uuid","encryption":"none"}]}]},"streamSettings":{"network":"tcp","security":"$sec","tlsSettings":{"serverName":"$sni"}}}
+EOF
+  else
+    echo "Proto lain belum dibuat di contoh ini. Tambahkan sendiri sesuai kebutuhan."
+  fi
+
+  echo "OK: outbound $tag ditambahkan."
+  pause
+}
+
+add_rule_geosite(){
+  echo "Tambah rule domain (geosite)."
+  read -rp "Inbound tags (pisahkan koma, kosong=ALL): " inb
+  read -rp "Geosite (contoh geosite:google): " gs
+  read -rp "Pakai outboundTag atau balancerTag? (o/b): " mode
+  if [[ "$mode" == "b" ]]; then
+    read -rp "balancerTag: " bt
+    inbound_json=""
+    [[ -n "$inb" ]] && inbound_json=$(printf '"inboundTag":[%s],' "$(echo "$inb" | sed 's/,/","/g; s/^/"/; s/$/"/')")
+    echo "{${inbound_json}\"type\":\"field\",\"domain\":[\"$gs\"],\"balancerTag\":\"$bt\"}" >>"$RULE"
+  else
+    read -rp "outboundTag: " ot
+    inbound_json=""
+    [[ -n "$inb" ]] && inbound_json=$(printf '"inboundTag":[%s],' "$(echo "$inb" | sed 's/,/","/g; s/^/"/; s/$/"/')")
+    echo "{${inbound_json}\"type\":\"field\",\"domain\":[\"$gs\"],\"outboundTag\":\"$ot\"}" >>"$RULE"
+  fi
+  echo "OK: rule geosite ditambahkan."
+  pause
+}
+
+add_balancer(){
+  echo "Tambah balancer."
+  read -rp "balancer tag (contoh googleBalancer): " btag
+  read -rp "selector outbound tags (pisahkan koma): " sel
+  read -rp "strategy (leastLoad/random/leastPing): " st
+
+  selector_json=$(printf '"selector":[%s]' "$(echo "$sel" | sed 's/,/","/g; s/^/"/; s/$/"/')")
+  echo "{\"tag\":\"$btag\",$selector_json,\"strategy\":{\"type\":\"$st\"}}" >>"$BAL"
+
+  echo "OK: balancer ditambahkan."
+  pause
+}
+
+build_routing_block(){
+  # Gabungkan jsonl -> json array
+  balancers=$(jq -s '.' "$BAL")
+  rules=$(jq -s '.' "$RULE")
+
+  cat <<EOF
+"routing":{
+  "domainStrategy":"IPOnDemand",
+  "balancers": $balancers,
+  "rules": $rules
+}
+EOF
+}
+
+build_outbounds_array(){
+  # outbounds default + outbounds dari menu
+  defaults='[
+    {"tag":"direct","protocol":"freedom"},
+    {"tag":"blocked","protocol":"blackhole"}
+  ]'
+  custom=$(jq -s '.' "$OUTB")
+  jq -n --argjson d "$defaults" --argjson c "$custom" '$d + $c'
+}
+
+main_menu(){
+  while true; do
+    clear
+    echo "=== XRAY ROUTING MENU ==="
+    echo "1) Tambah Outbound Route (ke VPS2/exit)"
+    echo "2) Tambah Rule Domain (geosite)"
+    echo "3) Tambah Balancer"
+    echo "4) Tampilkan hasil routing block (JSON)"
+    echo "5) Tampilkan outbounds array (JSON)"
+    echo "0) Keluar"
+    read -rp "Pilih: " p
+    case "$p" in
+      1) add_outbound_route ;;
+      2) add_rule_geosite ;;
+      3) add_balancer ;;
+      4) build_routing_block | sed 's/^/  /' ; pause ;;
+      5) build_outbounds_array ; pause ;;
+      0) exit 0 ;;
+    esac
+  done
+}
+
+main_menu
