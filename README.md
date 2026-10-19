@@ -40,7 +40,7 @@ sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.di
 
 # Script Install 2 -Lastest V1 ( Debian 10/11/12 & Ubuntu 20,22,24 LTS )
 ```
-sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && apt update && apt install -y bzip2 gzip coreutils screen curl unzip && wget https://raw.githubusercontent.com/rwrtx/sctomatto/main/V1-stable.sh && chmod +x V1-stable.sh && sed -i -e 's/\r$//' V1-stable.sh && screen -S main ./V1-stable.sh
+sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && sysctl -w net.ipv6.conf.lo.disable_ipv6=1 && echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6 && echo 1 > /proc/sys/net/ipv6/conf/default/disable_ipv6 && echo 1 > /proc/sys/net/ipv6/conf/lo/disable_ipv6 && apt update && apt install -y bzip2 gzip coreutils screen curl unzip && wget https://raw.githubusercontent.com/rwrtx/sctomatto/main/V1-stable.sh && chmod +x V1-stable.sh && sed -i -e 's/\r$//' V1-stable.sh && screen -S main ./V1-stable.sh
 ```
 
 # Script Install 3 -Old ( Debian 10 & Ubuntu 20 LTS )
